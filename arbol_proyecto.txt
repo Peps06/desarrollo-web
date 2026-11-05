@@ -1,0 +1,159 @@
+Bitácora de viajes colaborativa - Estructura del proyecto
+Los archivos llevan el responsable y la HU que implementan.
+Paquete Java base: com.bitacora.viajes (lo genera Dana en HU-07 con Spring Initializr).
+
+desarrollo-web/
+├── .github/
+│   └── pull_request_template.md                                     Alfonso · HU-01
+├── .mvn/
+│   └── wrapper/
+│       └── maven-wrapper.properties                                 Dana · HU-07
+├── docs/
+│   ├── wireframes/
+│   ├── evidencias/
+│   │   └── README.md                                                Diego · HU-43
+│   ├── guia-instalacion-wsl.md                                      Alfonso · HU-02
+│   ├── requerimientos.md                                            Stephy · HU-03
+│   ├── validacion-tema.md                                           Stephy · HU-03
+│   ├── definition-of-done.md                                        Stephy · HU-03
+│   ├── calendario.md                                                Stephy · HU-03
+│   ├── diagrama-er.png                                              Dana · HU-04
+│   ├── api.md                                                       Diego · HU-05
+│   ├── guia-css.md                                                  Citlaly · HU-06
+│   ├── pruebas.md                                                   Dana · HU-40
+│   └── guion-demo.md                                                Alfonso · HU-44
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── bitacora/
+│   │   │           └── viajes/
+│   │   │               ├── config/
+│   │   │               │   ├── SecurityConfig.java                  Dana · HU-09
+│   │   │               │   └── DataLoader.java                      Dana · HU-07
+│   │   │               ├── controller/
+│   │   │               │   ├── AuthController.java                  Dana · HU-08, HU-09
+│   │   │               │   ├── ViajeController.java                 Stephy · HU-10, HU-11, HU-23
+│   │   │               │   ├── ViajeDetalleController.java          Diego · HU-12
+│   │   │               │   ├── ParticipanteController.java          Stephy · HU-18
+│   │   │               │   ├── ActividadController.java             Diego · HU-13, HU-19, HU-24
+│   │   │               │   ├── VotoController.java                  Alfonso · HU-14
+│   │   │               │   ├── GastoController.java                 Citlaly · HU-15, HU-20, HU-25
+│   │   │               │   ├── PresupuestoController.java           Alfonso · HU-16
+│   │   │               │   ├── BalanceController.java               Alfonso · HU-21
+│   │   │               │   ├── TareaController.java                 Stephy · HU-37
+│   │   │               │   ├── ExportarPdfController.java           Diego · HU-34
+│   │   │               │   └── PaginaController.java                Dana, Stephy, Diego · HU-26 a HU-29
+│   │   │               ├── dto/
+│   │   │               │   ├── RegistroRequest.java                 Dana · HU-08
+│   │   │               │   ├── LoginRequest.java                    Dana · HU-09
+│   │   │               │   ├── UsuarioResponse.java                 Dana · HU-08
+│   │   │               │   ├── ViajeRequest.java                    Stephy · HU-10, HU-23
+│   │   │               │   ├── ViajeResponse.java                   Stephy · HU-10, HU-11
+│   │   │               │   ├── ViajeDetalleResponse.java            Diego · HU-12
+│   │   │               │   ├── DiaResponse.java                     Diego · HU-12
+│   │   │               │   ├── ActividadRequest.java                Diego · HU-13, HU-19
+│   │   │               │   ├── ActividadResponse.java               Diego · HU-12, HU-13
+│   │   │               │   ├── ActividadMasVotadaResponse.java      Alfonso · HU-22
+│   │   │               │   ├── ParticipanteRequest.java             Stephy · HU-18
+│   │   │               │   ├── ParticipanteResponse.java            Stephy · HU-18
+│   │   │               │   ├── VotoResponse.java                    Alfonso · HU-14
+│   │   │               │   ├── GastoRequest.java                    Citlaly · HU-15
+│   │   │               │   ├── GastoResponse.java                   Citlaly · HU-15
+│   │   │               │   ├── GastoRegistradoResponse.java         Citlaly · HU-15
+│   │   │               │   ├── PresupuestoResponse.java             Alfonso · HU-16
+│   │   │               │   ├── BalanceResponse.java                 Alfonso · HU-21
+│   │   │               │   ├── SaldoResponse.java                   Alfonso · HU-21
+│   │   │               │   ├── TransferenciaResponse.java           Alfonso · HU-21
+│   │   │               │   ├── TareaRequest.java                    Stephy · HU-37
+│   │   │               │   ├── TareaResponse.java                   Stephy · HU-37
+│   │   │               │   ├── ErrorResponse.java                   Dana · HU-17
+│   │   │               │   └── ErrorCampo.java                      Dana · HU-17
+│   │   │               ├── exception/
+│   │   │               │   ├── RecursoNoEncontradoException.java    Dana · HU-17
+│   │   │               │   ├── AccesoDenegadoException.java         Dana · HU-17
+│   │   │               │   ├── DatosInvalidosException.java         Dana · HU-17
+│   │   │               │   └── GlobalExceptionHandler.java          Dana · HU-17
+│   │   │               ├── model/
+│   │   │               │   ├── Usuario.java                         Dana · HU-07
+│   │   │               │   ├── Viaje.java                           Dana · HU-07
+│   │   │               │   ├── ParticipanteViaje.java               Dana · HU-07
+│   │   │               │   ├── Actividad.java                       Dana · HU-07
+│   │   │               │   ├── Voto.java                            Dana · HU-07
+│   │   │               │   ├── Gasto.java                           Dana · HU-07
+│   │   │               │   ├── Tarea.java                           Dana · HU-07
+│   │   │               │   ├── RolParticipante.java                 Dana · HU-07
+│   │   │               │   ├── EstadoViaje.java                     Dana · HU-07, HU-23
+│   │   │               │   └── CategoriaGasto.java                  Citlaly · HU-15
+│   │   │               ├── repository/
+│   │   │               │   ├── UsuarioRepository.java               Dana · HU-07
+│   │   │               │   ├── ViajeRepository.java                 Dana · HU-07
+│   │   │               │   ├── ParticipanteViajeRepository.java     Dana · HU-07
+│   │   │               │   ├── ActividadRepository.java             Dana · HU-07
+│   │   │               │   ├── VotoRepository.java                  Dana · HU-07
+│   │   │               │   ├── GastoRepository.java                 Dana · HU-07
+│   │   │               │   └── TareaRepository.java                 Dana · HU-07
+│   │   │               ├── service/
+│   │   │               │   ├── UsuarioService.java                  Dana · HU-08
+│   │   │               │   ├── UsuarioDetailsService.java           Dana · HU-09
+│   │   │               │   ├── ViajeService.java                    Stephy · HU-10, HU-11, HU-23
+│   │   │               │   ├── ViajeDetalleService.java             Diego · HU-12
+│   │   │               │   ├── ParticipanteService.java             Stephy · HU-18
+│   │   │               │   ├── ActividadService.java                Diego · HU-13, HU-19, HU-24
+│   │   │               │   ├── VotoService.java                     Alfonso · HU-14
+│   │   │               │   ├── GastoService.java                    Citlaly · HU-15, HU-20, HU-25
+│   │   │               │   ├── AlmacenamientoService.java           Citlaly · HU-25
+│   │   │               │   ├── PresupuestoService.java              Alfonso · HU-16
+│   │   │               │   ├── BalanceService.java                  Alfonso · HU-21
+│   │   │               │   ├── ActividadGanadoraService.java        Alfonso · HU-22
+│   │   │               │   ├── TareaService.java                    Stephy · HU-37
+│   │   │               │   └── PdfService.java                      Diego · HU-34
+│   │   │               └── BitacoraViajesApplication.java           Dana · HU-07
+│   │   └── resources/
+│   │       ├── templates/
+│   │       │   ├── fragments/
+│   │       │   │   └── base.html                                    Stephy · HU-36
+│   │       │   ├── viajes/
+│   │       │   │   ├── lista.html                                   Stephy · HU-28
+│   │       │   │   ├── nuevo.html                                   Stephy · HU-27
+│   │       │   │   └── detalle.html                                 Diego · HU-29
+│   │       │   ├── login.html                                       Dana · HU-26
+│   │       │   └── registro.html                                    Dana · HU-26
+│   │       ├── static/
+│   │       │   ├── css/
+│   │       │   │   ├── variables.css                                Citlaly · HU-35
+│   │       │   │   ├── base.css                                     Citlaly · HU-35
+│   │       │   │   ├── componentes.css                              Citlaly · HU-35
+│   │       │   │   ├── presupuesto.css                              Citlaly · HU-32
+│   │       │   │   └── responsive.css                               Citlaly · HU-35
+│   │       │   └── js/
+│   │       │       ├── mensajes.js                                  Stephy · HU-36
+│   │       │       ├── validacion.js                                Dana · HU-26
+│   │       │       ├── auth.js                                      Dana · HU-26
+│   │       │       ├── viaje-nuevo.js                               Stephy · HU-27
+│   │       │       ├── viajes-lista.js                              Stephy · HU-28
+│   │       │       ├── viaje-detalle.js                             Diego · HU-29
+│   │       │       ├── votos.js                                     Alfonso · HU-30
+│   │       │       ├── gastos.js                                    Citlaly · HU-31
+│   │       │       ├── presupuesto.js                               Citlaly · HU-32
+│   │       │       ├── balance.js                                   Dana · HU-33
+│   │       │       ├── checklist.js                                 Stephy · HU-37
+│   │       │       ├── divisas.js                                   Dana · HU-38
+│   │       │       └── comprobantes.js                              Citlaly · HU-39
+│   │       └── application.properties.example                       Alfonso · HU-01
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── bitacora/
+│                   └── viajes/
+│                       ├── service/
+│                       │   ├── PresupuestoServiceTest.java          Alfonso · HU-16
+│                       │   ├── BalanceServiceTest.java              Alfonso · HU-21
+│                       │   └── ActividadGanadoraServiceTest.java    Alfonso · HU-22
+│                       └── BitacoraViajesApplicationTests.java      Dana · HU-07
+├── .gitignore                                                       Alfonso · HU-01
+├── README.md                                                        Alfonso · HU-01, HU-02 / Citlaly · HU-41
+├── arbol_proyecto.txt
+├── mvnw                                                             Dana · HU-07
+├── mvnw.cmd                                                         Dana · HU-07
+└── pom.xml                                                          Dana · HU-07

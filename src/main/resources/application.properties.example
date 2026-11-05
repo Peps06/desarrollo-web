@@ -1,0 +1,30 @@
+# =====================================================================
+# Bitácora de viajes colaborativa - configuración de EJEMPLO
+#
+# Copia este archivo como application.properties (en esta misma carpeta)
+# y cambia usuario/contraseña por los de tu MySQL en WSL.
+#   cp application.properties.example application.properties
+# application.properties NO se sube a GitHub (está en .gitignore).
+# =====================================================================
+
+spring.application.name=bitacora-viajes
+server.port=8080
+
+# ---- Base de datos MySQL (esquema y usuario: ver docs/guia-instalacion-wsl.md) ----
+spring.datasource.url=jdbc:mysql://localhost:3306/bitacora_viajes?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Mexico_City
+spring.datasource.username=bitacora_app
+spring.datasource.password=CAMBIA_ESTA_CLAVE
+
+# ---- JPA / Hibernate ----
+# update: crea/ajusta las tablas al iniciar (HU-07). Cambiar a validate al final del proyecto si se desea.
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# ---- Thymeleaf ----
+spring.thymeleaf.cache=false
+
+# ---- Comprobantes de gasto (HU-25, opcional) ----
+spring.servlet.multipart.max-file-size=2MB
+spring.servlet.multipart.max-request-size=2MB
+app.uploads.dir=uploads

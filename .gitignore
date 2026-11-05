@@ -1,0 +1,32 @@
+# ===== Maven / compilación =====
+target/
+!.mvn/wrapper/maven-wrapper.properties
+HELP.md
+
+# ===== IDEs =====
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+*.swp
+
+# ===== Sistema operativo =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Configuración local con credenciales (NO subir) =====
+# Cada integrante crea su propio application.properties a partir del .example
+application.properties
+application-local.properties
+# El archivo de ejemplo SÍ se sube (valores ficticios, sin credenciales)
+!application.properties.example
+
+# ===== Archivos subidos por los usuarios (comprobantes de gasto, HU-25) =====
+uploads/
+
+# ===== Logs =====
+*.log
+logs/
