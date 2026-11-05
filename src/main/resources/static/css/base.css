@@ -1,1 +1,203 @@
-/* HU-35 | Responsable: Citlaly | Estilos base y reset globales. */
+/**
+ * Reinicio de estilos, tipografía general, layout y barra de navegación.
+ * Define el aspecto de las etiquetas HTML sin clases; los componentes viven en componentes.css.
+ *
+ * @author Citlaly Morales Viveros
+ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--blanco-natural);
+    color: var(--texto);
+    font-family: var(--fuente-texto);
+    font-size: var(--texto-base);
+    line-height: 1.55;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    margin: 0 0 var(--espacio-3);
+    color: var(--azul-montana);
+    font-family: var(--fuente-titulo);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: var(--texto-2xl);
+}
+
+h2 {
+    font-size: var(--texto-xl);
+}
+
+h3 {
+    font-size: var(--texto-lg);
+}
+
+h4 {
+    font-size: var(--texto-base);
+}
+
+p {
+    margin: 0 0 var(--espacio-3);
+    max-width: 70ch;
+}
+
+a {
+    color: var(--azul-grisaceo);
+    text-underline-offset: 3px;
+}
+
+a:hover {
+    color: var(--azul-montana);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* El foco visible se mantiene en todos los elementos interactivos */
+:focus-visible {
+    outline: 3px solid var(--azul-grisaceo);
+    outline-offset: 2px;
+}
+
+.contenedor {
+    width: 100%;
+    max-width: var(--ancho-contenedor);
+    margin: 0 auto;
+    padding: 0 var(--espacio-5);
+}
+
+.pagina {
+    padding: var(--espacio-6) 0 var(--espacio-7);
+}
+
+.pagina__encabezado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espacio-3);
+    margin-bottom: var(--espacio-5);
+}
+
+.pagina__encabezado h1 {
+    margin: 0;
+}
+
+/* Rejilla que acomoda las tarjetas según el espacio disponible */
+.rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--espacio-5);
+}
+
+.pila {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-4);
+}
+
+.fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--espacio-3);
+}
+
+.fila--separada {
+    justify-content: space-between;
+}
+
+/* Barra superior con la marca y los enlaces de sesión */
+.barra-nav {
+    background: var(--azul-montana);
+    color: var(--texto-sobre-oscuro);
+    border-bottom: 4px solid var(--naranja-calido);
+}
+
+.barra-nav__contenido {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espacio-4);
+    min-height: 60px;
+}
+
+.barra-nav__marca {
+    color: var(--texto-sobre-oscuro);
+    font-family: var(--fuente-titulo);
+    font-size: var(--texto-lg);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.barra-nav__enlaces {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.barra-nav__enlaces a {
+    color: var(--texto-sobre-oscuro);
+    text-decoration: none;
+    padding: var(--espacio-1) 0;
+    border-bottom: 2px solid transparent;
+}
+
+.barra-nav__enlaces a:hover,
+.barra-nav__enlaces a[aria-current="page"] {
+    border-bottom-color: var(--verde-glaciar);
+}
+
+.barra-nav :focus-visible {
+    outline-color: var(--verde-glaciar);
+}
+
+/* Utilidades pequeñas que se repiten en varias vistas */
+.texto-suave {
+    color: var(--texto-suave);
+}
+
+.texto-centrado {
+    text-align: center;
+}
+
+.oculto {
+    display: none !important;
+}
+
+.solo-lector {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}

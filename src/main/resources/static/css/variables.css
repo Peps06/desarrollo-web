@@ -1,1 +1,65 @@
-/* HU-35 | Responsable: Citlaly | Variables CSS (colores, tipografía, espacios). */
+/**
+ * Variables globales de la interfaz: paleta, tipografía, espacios y sombras.
+ * Todo el CSS del proyecto toma sus valores de aquí; no se escriben colores sueltos en otros archivos.
+ *
+ * @author Citlaly Morales Viveros
+ */
+
+:root {
+    /* Paleta base del proyecto */
+    --azul-montana: #294C60;
+    --azul-grisaceo: #477A91;
+    --verde-glaciar: #83B6B3;
+    --naranja-calido: #E6A15C;
+    --blanco-natural: #F3F6F3;
+
+    /* Tonos derivados de la paleta para hover, bordes y fondos suaves */
+    --azul-profundo: #1D3846;
+    --glaciar-claro: #E3EFEE;
+    --naranja-oscuro: #C9823A;
+    --superficie: #FFFFFF;
+    --borde: #D3DEDA;
+
+    /* Texto */
+    --texto: #1F3340;
+    --texto-suave: #4F6877;
+    --texto-sobre-oscuro: var(--blanco-natural);
+
+    /* Estados: la barra de presupuesto y los saldos usan estos tres */
+    --estado-ok: #2E7D68;
+    --estado-ok-suave: #DDEFE9;
+    --estado-alerta: #D9A41E;
+    --estado-alerta-suave: #FBF0CF;
+    --estado-peligro: #B3423A;
+    --estado-peligro-suave: #F6DFDC;
+
+    /* Tipografía: titulares con serifa, texto corrido y formularios sin serifa */
+    --fuente-titulo: "Fraunces", Georgia, "Times New Roman", serif;
+    --fuente-texto: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+    --texto-xs: 0.8125rem;
+    --texto-sm: 0.9375rem;
+    --texto-base: 1rem;
+    --texto-lg: 1.25rem;
+    --texto-xl: 1.625rem;
+    --texto-2xl: 2.125rem;
+
+    /* Espaciado en escala de 4 px */
+    --espacio-1: 0.25rem;
+    --espacio-2: 0.5rem;
+    --espacio-3: 0.75rem;
+    --espacio-4: 1rem;
+    --espacio-5: 1.5rem;
+    --espacio-6: 2rem;
+    --espacio-7: 3rem;
+
+    /* Formas */
+    --radio-sm: 4px;
+    --radio-md: 8px;
+    --radio-lg: 14px;
+    --sombra-suave: 0 1px 2px rgba(41, 76, 96, 0.08), 0 2px 8px rgba(41, 76, 96, 0.06);
+    --sombra-elevada: 0 8px 24px rgba(41, 76, 96, 0.18);
+
+    --ancho-contenedor: 1120px;
+    --transicion: 150ms ease;
+}

@@ -1,1 +1,525 @@
-/* HU-35 | Responsable: Citlaly | Estilos de componentes reutilizables (botones, tarjetas, formularios). */
+/**
+ * Componentes compartidos: tarjetas, botones, formularios, tablas, mensajes,
+ * insignias, saldos, checklist y modal. Los nombres están documentados en docs/guia-css.md.
+ *
+ * @author Citlaly Morales Viveros
+ */
+
+/* Tarjetas */
+.tarjeta {
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-md);
+    box-shadow: var(--sombra-suave);
+    padding: var(--espacio-5);
+}
+
+.tarjeta__titulo {
+    margin-bottom: var(--espacio-2);
+}
+
+.tarjeta__meta {
+    margin: 0 0 var(--espacio-3);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+}
+
+.tarjeta--enlace {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+
+.tarjeta--enlace:hover {
+    border-color: var(--azul-grisaceo);
+    box-shadow: var(--sombra-elevada);
+}
+
+/* Tarjeta de un día del itinerario: pestaña lateral con la fecha, como una hoja de bitácora */
+.tarjeta-dia {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-md);
+    box-shadow: var(--sombra-suave);
+    overflow: hidden;
+}
+
+.tarjeta-dia__fecha {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--espacio-4) var(--espacio-2);
+    background: var(--azul-montana);
+    color: var(--texto-sobre-oscuro);
+    text-align: center;
+}
+
+.tarjeta-dia__numero {
+    font-family: var(--fuente-titulo);
+    font-size: var(--texto-2xl);
+    line-height: 1;
+}
+
+.tarjeta-dia__mes {
+    font-size: var(--texto-sm);
+}
+
+.tarjeta-dia__contenido {
+    padding: var(--espacio-4) var(--espacio-5);
+}
+
+.tarjeta-dia__vacio {
+    margin: 0;
+    color: var(--texto-suave);
+    font-style: italic;
+}
+
+/* Actividad dentro de un día */
+.actividad {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espacio-3);
+    padding: var(--espacio-3) 0;
+    border-bottom: 1px solid var(--borde);
+}
+
+.actividad:last-child {
+    border-bottom: 0;
+}
+
+.actividad__hora {
+    min-width: 3.5rem;
+    color: var(--azul-grisaceo);
+    font-weight: 600;
+}
+
+.actividad__info {
+    flex: 1 1 200px;
+}
+
+.actividad__titulo {
+    margin: 0;
+    font-weight: 600;
+}
+
+.actividad__detalle {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+}
+
+.actividad--ganadora {
+    background: var(--glaciar-claro);
+    margin: 0 calc(var(--espacio-3) * -1);
+    padding-left: var(--espacio-3);
+    padding-right: var(--espacio-3);
+    border-radius: var(--radio-sm);
+}
+
+/* Botones */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacio-2);
+    min-height: 40px;
+    padding: var(--espacio-2) var(--espacio-4);
+    border: 2px solid transparent;
+    border-radius: var(--radio-md);
+    background: transparent;
+    color: var(--azul-montana);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--transicion), border-color var(--transicion), color var(--transicion);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btn-primario {
+    background: var(--azul-montana);
+    color: var(--texto-sobre-oscuro);
+}
+
+.btn-primario:hover:not(:disabled) {
+    background: var(--azul-profundo);
+}
+
+.btn-secundario {
+    border-color: var(--azul-grisaceo);
+    color: var(--azul-montana);
+}
+
+.btn-secundario:hover:not(:disabled) {
+    background: var(--glaciar-claro);
+}
+
+.btn-peligro {
+    background: var(--estado-peligro);
+    color: #FFFFFF;
+}
+
+.btn-peligro:hover:not(:disabled) {
+    background: #8F332D;
+}
+
+.btn-texto {
+    min-height: 0;
+    padding: var(--espacio-1) var(--espacio-2);
+    color: var(--azul-grisaceo);
+}
+
+.btn-texto:hover:not(:disabled) {
+    color: var(--azul-montana);
+    text-decoration: underline;
+}
+
+.btn-pequeno {
+    min-height: 32px;
+    padding: var(--espacio-1) var(--espacio-3);
+    font-size: var(--texto-sm);
+}
+
+/* Botón de voto: cambia de aspecto cuando la persona ya votó */
+.btn-voto {
+    border-color: var(--azul-grisaceo);
+    color: var(--azul-grisaceo);
+    min-height: 34px;
+    padding: var(--espacio-1) var(--espacio-3);
+}
+
+.btn-voto.votado {
+    background: var(--azul-grisaceo);
+    color: var(--texto-sobre-oscuro);
+}
+
+.btn-voto__contador {
+    min-width: 1.25rem;
+    text-align: center;
+}
+
+/* Formularios */
+.formulario {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-4);
+    max-width: 480px;
+}
+
+.formulario--ancho {
+    max-width: none;
+}
+
+.formulario__fila {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--espacio-4);
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-1);
+}
+
+.campo__etiqueta {
+    font-weight: 600;
+    font-size: var(--texto-sm);
+}
+
+.campo__ayuda {
+    color: var(--texto-suave);
+    font-size: var(--texto-xs);
+}
+
+.campo__error {
+    min-height: 1em;
+    color: var(--estado-peligro);
+    font-size: var(--texto-xs);
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+    width: 100%;
+    min-height: 42px;
+    padding: var(--espacio-2) var(--espacio-3);
+    border: 1px solid var(--azul-grisaceo);
+    border-radius: var(--radio-md);
+    background: var(--superficie);
+    color: var(--texto);
+    font: inherit;
+}
+
+.campo textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+    outline: 3px solid var(--verde-glaciar);
+    outline-offset: 0;
+    border-color: var(--azul-montana);
+}
+
+.campo--invalido input,
+.campo--invalido select,
+.campo--invalido textarea {
+    border-color: var(--estado-peligro);
+    background: var(--estado-peligro-suave);
+}
+
+/* Monto con selector de moneda en la misma línea */
+.selector-moneda {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    gap: var(--espacio-2);
+}
+
+.equivalente-cambio {
+    padding: var(--espacio-2) var(--espacio-3);
+    border-left: 4px solid var(--verde-glaciar);
+    background: var(--glaciar-claro);
+    border-radius: var(--radio-sm);
+    font-size: var(--texto-sm);
+}
+
+/* Tablas */
+.tabla-contenedor {
+    overflow-x: auto;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-md);
+    background: var(--superficie);
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--texto-sm);
+}
+
+.tabla th,
+.tabla td {
+    padding: var(--espacio-3) var(--espacio-4);
+    text-align: left;
+    border-bottom: 1px solid var(--borde);
+}
+
+.tabla th {
+    background: var(--glaciar-claro);
+    color: var(--azul-montana);
+    font-weight: 600;
+}
+
+.tabla tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tabla .numero {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Mensajes de confirmación y error; mostrarMensaje() los coloca en .contenedor-mensajes */
+.contenedor-mensajes {
+    position: fixed;
+    top: var(--espacio-4);
+    right: var(--espacio-4);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-2);
+    width: min(380px, calc(100vw - 2rem));
+}
+
+.mensaje {
+    padding: var(--espacio-3) var(--espacio-4);
+    border: 1px solid transparent;
+    border-left-width: 5px;
+    border-radius: var(--radio-md);
+    box-shadow: var(--sombra-elevada);
+    font-size: var(--texto-sm);
+}
+
+.mensaje-exito {
+    background: var(--estado-ok-suave);
+    border-color: var(--estado-ok);
+    color: #1B4F42;
+}
+
+.mensaje-error {
+    background: var(--estado-peligro-suave);
+    border-color: var(--estado-peligro);
+    color: #6E2620;
+}
+
+.mensaje-aviso {
+    background: var(--estado-alerta-suave);
+    border-color: var(--estado-alerta);
+    color: #5E4608;
+}
+
+/* Insignias */
+.insignia {
+    display: inline-block;
+    padding: 2px var(--espacio-2);
+    border-radius: 999px;
+    background: var(--glaciar-claro);
+    color: var(--azul-montana);
+    font-size: var(--texto-xs);
+    font-weight: 600;
+}
+
+.insignia-ganadora {
+    background: var(--naranja-calido);
+    color: var(--azul-profundo);
+}
+
+.insignia-organizador {
+    background: var(--azul-montana);
+    color: var(--texto-sobre-oscuro);
+}
+
+/* Saldos del balance de deudas */
+.saldo-favor {
+    color: var(--estado-ok);
+    font-weight: 600;
+}
+
+.saldo-deuda {
+    color: var(--estado-peligro);
+    font-weight: 600;
+}
+
+.saldo-cero {
+    color: var(--texto-suave);
+}
+
+.transferencia {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--espacio-2);
+    padding: var(--espacio-3) 0;
+    border-bottom: 1px solid var(--borde);
+}
+
+.transferencia:last-child {
+    border-bottom: 0;
+}
+
+/* Checklist de tareas */
+.checklist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tarea {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-3);
+    padding: var(--espacio-2) 0;
+    border-bottom: 1px solid var(--borde);
+}
+
+.tarea input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--azul-montana);
+}
+
+.tarea__texto {
+    flex: 1;
+}
+
+.tarea.completada .tarea__texto {
+    color: var(--texto-suave);
+    text-decoration: line-through;
+}
+
+.contador-tareas {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+}
+
+/* Modal, por ejemplo el del comprobante de gasto */
+.modal-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--espacio-4);
+    background: rgba(29, 56, 70, 0.6);
+}
+
+.modal {
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--espacio-5);
+    border-radius: var(--radio-lg);
+    background: var(--superficie);
+    box-shadow: var(--sombra-elevada);
+}
+
+.modal__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--espacio-4);
+}
+
+.modal__cabecera h2 {
+    margin: 0;
+}
+
+.comprobante-imagen {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-md);
+}
+
+/* Estado vacío con invitación a actuar */
+.vacio {
+    padding: var(--espacio-6) var(--espacio-4);
+    border: 2px dashed var(--verde-glaciar);
+    border-radius: var(--radio-lg);
+    text-align: center;
+    color: var(--texto-suave);
+}
+
+.vacio p {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Página de acceso (login y registro) */
+.acceso {
+    display: grid;
+    place-items: center;
+    min-height: calc(100vh - 64px);
+    padding: var(--espacio-5);
+}
+
+.acceso .tarjeta {
+    width: 100%;
+    max-width: 420px;
+}

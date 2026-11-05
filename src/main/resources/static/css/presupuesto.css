@@ -1,1 +1,79 @@
 /* HU-32 | Responsable: Citlaly | Estilos de la sección de presupuesto y gastos. */
+
+/**
+ * Barra de presupuesto y su resumen.
+ * El estado se marca con una clase en .barra-presupuesto (estado-ok, estado-alerta o estado-excedido)
+ * y el porcentaje con la variable --uso, por ejemplo style="--uso: 62%". Arriba de 100% se envía 100%.
+ *
+ * @author Citlaly Morales Viveros (Cliente / Programadora XP)
+ */
+
+.resumen-presupuesto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--espacio-4);
+    margin-bottom: var(--espacio-4);
+}
+
+.resumen-presupuesto__dato dt {
+    color: var(--texto-suave);
+    font-size: var(--texto-xs);
+}
+
+.resumen-presupuesto__dato dd {
+    margin: 0;
+    color: var(--azul-montana);
+    font-family: var(--fuente-titulo);
+    font-size: var(--texto-xl);
+    font-variant-numeric: tabular-nums;
+}
+
+.barra-presupuesto {
+    --uso: 0%;
+    --color-barra: var(--estado-ok);
+    position: relative;
+    height: 18px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--glaciar-claro);
+    border: 1px solid var(--borde);
+}
+
+.barra-presupuesto__relleno {
+    display: block;
+    width: var(--uso);
+    height: 100%;
+    border-radius: 999px;
+    background: var(--color-barra);
+    transition: width 400ms ease, background var(--transicion);
+}
+
+.barra-presupuesto.estado-ok {
+    --color-barra: var(--estado-ok);
+}
+
+.barra-presupuesto.estado-alerta {
+    --color-barra: var(--estado-alerta);
+}
+
+.barra-presupuesto.estado-excedido {
+    --color-barra: var(--estado-peligro);
+}
+
+.barra-presupuesto__etiqueta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--espacio-2);
+    font-size: var(--texto-sm);
+    font-variant-numeric: tabular-nums;
+}
+
+.aviso-excedido {
+    margin-top: var(--espacio-3);
+    padding: var(--espacio-2) var(--espacio-3);
+    border-left: 5px solid var(--estado-peligro);
+    border-radius: var(--radio-sm);
+    background: var(--estado-peligro-suave);
+    color: #6E2620;
+    font-weight: 600;
+}

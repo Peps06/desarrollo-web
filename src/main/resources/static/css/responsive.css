@@ -1,1 +1,87 @@
-/* HU-35 | Responsable: Citlaly | Reglas responsive para pantallas pequeñas. */
+/**
+ * Ajustes por tamaño de pantalla: laptop desde 1024 px y tablet hasta 768 px.
+ * Solo modifica estilos; el HTML de cada vista no se toca.
+ *
+ * @author Citlaly Morales Viveros
+ */
+
+@media (min-width: 1024px) {
+    .rejilla {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Detalle del viaje: itinerario a la izquierda y panel de gastos a la derecha */
+    .detalle-viaje {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+        gap: var(--espacio-6);
+        align-items: start;
+    }
+
+    .panel-lateral {
+        position: sticky;
+        top: var(--espacio-4);
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: var(--texto-xl);
+    }
+
+    h2 {
+        font-size: var(--texto-lg);
+    }
+
+    .contenedor {
+        padding: 0 var(--espacio-4);
+    }
+
+    .rejilla {
+        grid-template-columns: 1fr;
+    }
+
+    .barra-nav__contenido {
+        flex-wrap: wrap;
+        padding: var(--espacio-2) 0;
+    }
+
+    .tarjeta-dia {
+        grid-template-columns: 1fr;
+    }
+
+    .tarjeta-dia__fecha {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: var(--espacio-2);
+        padding: var(--espacio-2) var(--espacio-4);
+    }
+
+    .tarjeta-dia__numero {
+        font-size: var(--texto-lg);
+    }
+
+    .panel-lateral {
+        margin-top: var(--espacio-5);
+    }
+
+    .formulario {
+        max-width: none;
+    }
+
+    .btn {
+        min-height: 44px;
+    }
+
+    .contenedor-mensajes {
+        left: var(--espacio-4);
+        right: var(--espacio-4);
+        width: auto;
+    }
+
+    .modal {
+        max-width: none;
+        max-height: 100vh;
+        border-radius: var(--radio-md);
+    }
+}
