@@ -16,7 +16,7 @@ spring.datasource.username=bitacora_app
 spring.datasource.password=CAMBIA_ESTA_CLAVE
 
 # ---- JPA / Hibernate ----
-# update: crea/ajusta las tablas al iniciar (HU-07). Cambiar a validate al final del proyecto si se desea.
+# update: crea/ajusta las tablas al iniciar. Cambiar a validate al final del proyecto si se desea.
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
@@ -24,7 +24,7 @@ spring.jpa.properties.hibernate.format_sql=true
 # ---- Thymeleaf ----
 spring.thymeleaf.cache=false
 
-# ---- Comprobantes de gasto (HU-25, opcional) ----
+# ---- Comprobantes de gasto ----
 spring.servlet.multipart.max-file-size=2MB
 spring.servlet.multipart.max-request-size=2MB
 app.uploads.dir=uploads
