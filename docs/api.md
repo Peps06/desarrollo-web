@@ -1,5 +1,10 @@
 # API REST – Bitácora de viajes colaborativa
 
+**Autor:** Diego  
+**Proyecto:** Bitácora de viajes colaborativa
+
+---
+
 Base: `http://localhost:8080`
 
 ---
