@@ -26,7 +26,7 @@ Durante la primera semana completamos la fase de **Análisis y diseño (Entregab
 | Creación y configuración del repositorio GitHub, README y flujo de trabajo. | Alfonso Mendoza        | [https://github.com/Peps06/desarrollo-web/commit/bc41a94](https://github.com/Peps06/desarrollo-web/commit/81a510d) |
 | Requerimientos funcionales y no funcionales + backlog priorizado.           | Stephanie Hernández    | [https://github.com/Peps06/desarrollo-web/commit/32be6f3](https://github.com/Peps06/desarrollo-web/commit/81a510d) |
 | Diagrama Entidad-Relación de las 7 tablas                                   | Dana Carmona           | [https://github.com/Peps06/desarrollo-web/commit/81a510d](https://github.com/Peps06/desarrollo-web/commit/115162d) |
-| Wireframes de las vistas y guía de clases CSS                               | Citlaly Morales        | [https://github.com/Peps06/desarrollo-web/commit/aa1cff0](https://github.com/Peps06/desarrollo-web/commit/81a510d) |
+| Wireframes de las vistas y guía de clases CSS                               | Citlaly Morales        | [https://github.com/Peps06/desarrollo-web/commit/599d9bd](https://github.com/Peps06/desarrollo-web/commit/599d9bd) |
 |                                                                             | Diego Jiménez          | [https://github.com/Peps06/desarrollo-web/commit/ca37260](https://github.com/Peps06/desarrollo-web/commit/81a510d) |
 
 
