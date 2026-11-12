@@ -1,1 +1,6 @@
-// HU-07, HU-23 | Responsable: Dana | Enum con los estados de un viaje.
+package com.bitacora.viajes.model;
+
+public enum EstadoViaje {
+    ACTIVO,
+    CANCELADO
+}

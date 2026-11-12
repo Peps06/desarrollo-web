@@ -1,1 +1,7 @@
-// HU-07 | Responsable: Dana | Repositorio JPA de tareas.
+package com.bitacora.viajes.repository;
+
+import com.bitacora.viajes.model.Tarea;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface TareaRepository extends JpaRepository<Tarea, Integer> {
+}
