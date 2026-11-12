@@ -1,7 +1,7 @@
 package com.bitacora.viajes.repository;
 
-import com.bitacora.viajes.model.Voto;
+import com.bitacora.viajes.model.Actividad;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface VotoRepository extends JpaRepository<Voto, Integer> {
+public interface ActividadRepository extends JpaRepository<Actividad, Integer> {
 }
