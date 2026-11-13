@@ -24,6 +24,7 @@ La planeación de un viaje en grupo termina dispersa en chats, notas y capturas;
 - **Dana Carmona Santamaria**
 - **Diego Rafael Jimenez Trujano**
 - **Stephanie Elizdeth Hernandez Prieto**
+- **Morales Viveros Citlaly**
 
 ## Estructura del repositorio
 
