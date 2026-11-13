@@ -40,12 +40,12 @@ public class SecurityConfig {
                                  "/css/**", "/js/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(ex -> ex
-                // Peticiones a /api sin sesión: 401.
                 .defaultAuthenticationEntryPointFor(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                         new AntPathRequestMatcher("/api/**"))
-                // Páginas sin sesión: redirección a /login.
-                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")));
+                .defaultAuthenticationEntryPointFor(
+                        new LoginUrlAuthenticationEntryPoint("/login"),
+                        new AntPathRequestMatcher("/**")));
         return http.build();
     }
 }
