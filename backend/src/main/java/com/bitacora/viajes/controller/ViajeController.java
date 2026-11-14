@@ -14,8 +14,11 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,8 +41,6 @@ public class ViajeController {
                     .body(new ErrorResponse("sesion", "Debes iniciar sesión para crear un viaje"));
         }
 
-        // Revisar errores de validación de anotacionnes (@NotBlank, @NotNull,
-        // @DecimalMin)
         if (resultado.hasErrors()) {
             FieldError error = resultado.getFieldError();
             return ResponseEntity.badRequest()
@@ -47,14 +48,12 @@ public class ViajeController {
         }
 
         try {
-            // El correo se toma siempre de la sesión autenticada, nunca del cliente
             String correoUsuario = autenticacion.getName();
             ViajeResponse viajeCreado = viajeService.crearViaje(solicitud, correoUsuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(viajeCreado);
         } catch (ValidacionViajeException e) {
             return ResponseEntity.badRequest()
                     .body(new ErrorResponse(e.getCampo(), e.getMessage()));
-
         }
     }
 
@@ -70,5 +69,41 @@ public class ViajeController {
         String correoUsuario = autenticacion.getName();
         List<ViajeResponse> viajes = viajeService.listarMisViajes(correoUsuario);
         return ResponseEntity.ok(viajes);
+    }
+
+    // HU-23: Editar datos de un viaje (solo ORGANIZADOR)
+    @PutMapping("/{id}")
+    public ResponseEntity<?> editarViaje(@PathVariable("id") Integer viajeId,
+            @Valid @RequestBody ViajeRequest solicitud,
+            BindingResult resultado,
+            Authentication autenticacion) {
+        if (autenticacion == null || !autenticacion.isAuthenticated()
+                || autenticacion instanceof AnonymousAuthenticationToken) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("sesion", "Debes iniciar sesión para editar un viaje"));
+        }
+
+        if (resultado.hasErrors()) {
+            FieldError error = resultado.getFieldError();
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse(error.getField(), error.getDefaultMessage()));
+        }
+
+        ViajeResponse actualizado = viajeService.editarViaje(viajeId, solicitud, autenticacion.getName());
+        return ResponseEntity.ok(actualizado);
+    }
+
+    // HU-23: Cancelar un viaje sin borrado físico (solo ORGANIZADOR)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> cancelarViaje(@PathVariable("id") Integer viajeId,
+            Authentication autenticacion) {
+        if (autenticacion == null || !autenticacion.isAuthenticated()
+                || autenticacion instanceof AnonymousAuthenticationToken) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("sesion", "Debes iniciar sesión para cancelar un viaje"));
+        }
+
+        viajeService.cancelarViaje(viajeId, autenticacion.getName());
+        return ResponseEntity.noContent().build();
     }
 }
