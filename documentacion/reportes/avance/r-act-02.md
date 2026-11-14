@@ -14,6 +14,8 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - Se implementó el endpoint `POST /api/viajes`para crear nuevos viajes con validaciones de campos (destino obligatorio, fechas coherentes, presupuesto mayor a cero y moneda base de 3 letras con `MXN` por defecto), asociando automáticamente al usuario autenticado como `ORGANIZADOR` en la tabla `participante_viaje` dentro de una transacción (`@Transactional`).
 - Se implementó el endpoint `GET /api/viajes` para consultar únicamente los viajes activos (`ACTIVO`, excluyendo `CANCELADO`) en los que participa el usuario en sesión, devolviendo los datos generales del viaje junto con su rol (`ORGANIZADOR` o `PARTICIPANTE`).
 - Se ejecutaron pruebas funcionales mediante `cURL` con manejo de cookies de sesión (`JSESSIONID`) para verificar casos de éxito (`201 Created`, `200 OK`) y validación de errores (`400 Bad Request`), comprobando además la persistencia en MySQL.
+- Se implementó el endpoint `GET /api/viajes/{id}` que devuelve el detalle del viaje: datos generales, participantes con rol, total gastado y una entrada por cada fecha entre `fechaInicio` y `fechaFin` (aunque no tenga actividades), con las actividades de cada día ordenadas por hora, su autor, total de votos y si el usuario en sesión ya votó. Se usan DTOs y consultas con `JOIN FETCH` y agrupadas para evitar el problema N+1.
+- Se implementó el endpoint `POST /api/viajes/{id}/actividades` para proponer actividades, con validación de título, hora, día dentro del rango del viaje y costo estimado no negativo, tomando el autor de la sesión y respondiendo `201 Created`, `403` si el usuario no participa y `404` si el viaje no existe.
 - *(Espacio para que los demás integrantes agreguen sus actividades)*
 
 ---
@@ -24,7 +26,9 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 | :--- | :--- | :--- |
 | Implementación de endpoint `POST /api/viajes` para crear viaje y registrar organizador | Stephanie Hernández | [https://github.com/Peps06/desarrollo-web/commit/15cc7a1](https://github.com/Peps06/desarrollo-web/commit/15cc7a1) |
 | Implementación de endpoint `GET /api/viajes` para listar viajes activos del usuario autenticado | Stephanie Hernández | [https://github.com/Peps06/desarrollo-web/commit/bf861e5](https://github.com/Peps06/desarrollo-web/commit/bf861e5) |
-| *(Espacio para actividades de Dana, Diego, Alfonso y Citlaly)* | | |
+| Implementación de endpoint `GET /api/viajes/{id}` para consultar el detalle del viaje por días | Diego Jiménez | [https://github.com/Peps06/desarrollo-web/commit/77663df](https://github.com/Peps06/desarrollo-web/commit/77663df) |
+| Implementación de endpoint `POST /api/viajes/{id}/actividades` para proponer una actividad | Diego Jiménez | [https://github.com/Peps06/desarrollo-web/commit/77663df](https://github.com/Peps06/desarrollo-web/commit/77663df) |
+| *(Espacio para actividades de Dana, Alfonso y Citlaly)* | | |
 
 ---
 
@@ -42,6 +46,11 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 
 - Creación de viajes (`POST /api/viajes`) con validación de negocio, persistencia transaccional en `viaje` y `participante_viaje`, y respuesta `201 Created`.
 - Consulta de viajes activos por usuario autenticado (`GET /api/viajes`) devolviendo listado con rol asignado o lista vacía (`200 OK`).
+
+**Operativas / completadas (módulos de Diego):**
+
+- Consulta del detalle del viaje (`GET /api/viajes/{id}`) con participantes, total gastado y días con sus actividades ordenadas por hora, validando que el usuario participe (`403`) y que el viaje exista (`404`).
+- Creación de actividades (`POST /api/viajes/{id}/actividades`) con validaciones de negocio y respuesta `201 Created` con el autor tomado de la sesión.
 
 **Pendientes (próxima fase - Backend completo):**
 
@@ -62,11 +71,21 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 
 ---
 
+-**Diego**
+
+- **Herramienta utilizada:** Claude (Anthropic)
+- **Actividad para la que se utilizó:** Apoyo en la codificación de `ViajeDetalleController`, `ViajeDetalleService`, `ActividadController` y `ActividadService`, los DTOs `ViajeDetalleResponse`, `DiaResponse`, `ActividadRequest` y `ActividadResponse`, y las consultas JPQL de `ParticipanteViajeRepository`, `ActividadRepository`, `VotoRepository` y `GastoRepository`.
+- **Código o contenido generado:** Borradores de los DTOs, de la lógica que agrupa las actividades por día y de las consultas con `JOIN FETCH` y agrupadas.
+- **Modificaciones realizadas por el equipo:** Se reutilizó `ViajeResponse` (el detalle lo extiende) y el formato `ErrorResponse(campo, mensaje)` del equipo, y se dejó la excepción del servicio como clase interna para no modificar `GlobalExceptionHandler`.
+- **Forma en que se verificó el resultado:** Pruebas manuales con `cURL` y cookie de sesión (`200`, `201`, `400`, `401`, `403` y `404`) y revisión de los datos en MySQL. El detalle completo se encuentra en `documentacion/reportes/ia-desarrollo/diego/`.
+
+---
+
 # 6. Participación individual
 
 - **Stephanie Elizdeth Hernández Prieto:** Implementación de **Crear viaje** (endpoint `POST /api/viajes`, DTOs `ViajeRequest`/`ViajeResponse`, validaciones y servicio transaccional para registrar al creador como `ORGANIZADOR`), implementación de **Ver mis viajes** (endpoint `GET /api/viajes` y consulta JPQL filtrando viajes activos del usuario en sesión), pruebas con `cURL` y verificación en MySQL.
 - **Dana Carmona Santamaría:** *(Completar)*
-- **Diego Rafael Jiménez Trujano:** *(Completar)*
+- **Diego Rafael Jiménez Trujano:** Implementación de **Detalle del viaje por días** (endpoint `GET /api/viajes/{id}`, DTOs `ViajeDetalleResponse`/`DiaResponse`/`ActividadResponse`, servicio con consultas sin N+1 y validación de participación) e implementación de **Proponer actividad** (endpoint `POST /api/viajes/{id}/actividades`, DTO `ActividadRequest` con validaciones y servicio que registra al autor desde la sesión), pruebas con `cURL` y verificación en MySQL.
 - **Alfonso Mendoza Vásquez:** *(Completar)*
 - **Citlaly Morales Viveros:** *(Completar)*
 
@@ -76,6 +95,7 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 
 - Actividad 1: Implementar gestión de participantes por viaje (`POST` y `DELETE /api/viajes/{id}/participantes`) — **Gestionar participantes**.
 - Actividad 2: Implementar edición y cancelación lógica de viajes (`PUT` y `DELETE /api/viajes/{id}`) — **Editar y eliminar actividades**.
+- Actividad 3: Implementar edición y eliminación de actividades (`PUT /api/actividades/{id}` y `DELETE /api/actividades/{id}`) y filtros de actividades por día y costo máximo.
 - *(Espacio para próximas actividades del resto del equipo)*
 
 ---
