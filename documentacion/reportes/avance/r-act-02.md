@@ -19,8 +19,9 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - Se ejecutaron pruebas funcionales mediante `cURL` con manejo de cookies de sesión (`JSESSIONID`) para verificar casos de éxito (`201 Created`, `200 OK`) y validación de errores (`400 Bad Request`), comprobando además la persistencia en MySQL.
 - Se implementó el endpoint `GET /api/viajes/{id}` que devuelve el detalle del viaje: datos generales, participantes con rol, total gastado y una entrada por cada fecha entre `fechaInicio` y `fechaFin` (aunque no tenga actividades), con las actividades de cada día ordenadas por hora, su autor, total de votos y si el usuario en sesión ya votó. Se usan DTOs y consultas con `JOIN FETCH` y agrupadas para evitar el problema N+1.
 - Se implementó el endpoint `POST /api/viajes/{id}/actividades` para proponer actividades, con validación de título, hora, día dentro del rango del viaje y costo estimado no negativo, tomando el autor de la sesión y respondiendo `201 Created`, `403` si el usuario no participa y `404` si el viaje no existe.
-
-- *(Espacio para que los demás integrantes agreguen sus actividades)*
+- Se implementó el módulo de gastos, entidad `Gasto` con monto en `BigDecimal`, categoría, moneda original, monto original y tipo de cambio, campo `imagenUrl` para el comprobante y restricción `@Check(monto > 0)`; repositorio `GastoRepository` con `sumarMontoPorViaje` y `existeParticipacion`; servicio `GastoService` y controlador `GastoController`.
+- Se implementó el endpoint `POST /api/gastos` para registrar un gasto (201 con el gasto creado y el total del viaje). Valida que el viaje exista (404), que esté activo, que el usuario participe en el viaje (403), que el concepto no esté vacío (máx. 150 caracteres), que la categoría sea válida y que el monto sea mayor a cero; si no se mandan los campos de moneda, se asume MXN con tipo de cambio 1.
+- Se implementaron los endpoints `PUT /api/gastos/{id}` y `DELETE /api/gastos/{id}` para editar y eliminar gastos (HU-20, adelantado en esta fase): solo el autor del gasto o el organizador del viaje puede modificarlo (403 en caso contrario); al eliminar, si el gasto tenía comprobante, también se borra el archivo mediante `AlmacenamientoService`. Responden 200 con el total recalculado y 204, respectivamente.
 
 ---
 
@@ -35,7 +36,9 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 | Base del proyecto Spring Boot con entidades, repositorios, conexión a MySQL y datos de prueba | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/aa9594a](https://github.com/Peps06/desarrollo-web/commit/aa9594a) |
 | Registro de usuarios con validaciones y hash de contraseña | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/b42ac86](https://github.com/Peps06/desarrollo-web/commit/b42ac86) |
 | Inicio y cierre de sesión con Spring Security | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/4f66eed](https://github.com/Peps06/desarrollo-web/commit/4f66eed) |
-| *(Espacio para actividades de Alfonso y Citlaly)* | | |
+| Implementación del API de gastos: entidad `Gasto`, repositorio, servicio, controlador (`PUT` y `DELETE /api/gastos/{id}`), DTOs y excepciones propias | Citlaly Morales | [https://github.com/Peps06/desarrollo-web/commit/e72d585](https://github.com/Peps06/desarrollo-web/commit/e72d585) |
+| Correcciones del módulo de gastos: endpoint `POST /api/gastos`, `viajeId` y campos de divisas en `GastoRequest`, `viajeId` en `GastoResponse`, validaciones de viaje y participación, y `GlobalExceptionHandler` con formato `ErrorResponse` | Citlaly Morales | [https://github.com/Peps06/desarrollo-web/commit/d8fd7f0](https://github.com/Peps06/desarrollo-web/commit/d8fd7f0) |
+
 
 ---
 
@@ -44,7 +47,7 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - **Error de versiones Spring Boot:** Se presentó un error entre vesiones que trajo el Spring Initializr que era 4.x y del proyecto general que es 3.2.5. La solución fue reemplazar el pom.xml completo con las dependencias de Spring Boot 3.2.5
 - **Error de sintaxis JPQL al iniciar Spring Boot:** Se presentó un `QueryCreationException` en `ParticipanteViajeRepository` por falta de un espacio entre el alias de la entidad y la cláusula `WHERE` en la consulta concatenada (`vWHERE`). Se corrigió agregando el espaciado adecuado en la cadena `@Query`.
 - **Redirección `302` en peticiones sin sesión a `/api/viajes`:** Al probar el acceso no autenticado con `cURL`, Spring Security devolvió `302` hacia `/login` en lugar de `401 Unauthorized` debido al orden de los `AuthenticationEntryPoint` en `SecurityConfig.java`. Se documentó el hallazgo para su ajuste en la configuración de seguridad.
-
+- **Endpoint `POST /api/gastos` faltante en la primera versión del módulo de gastos:** La primera versión solo tenía `PUT` y `DELETE /api/gastos/{id}`. La revisión con IA lo marcó como crítico y se agregó el endpoint con su lógica de registro.
 ---
 
 # 4. Avance funcional
@@ -64,6 +67,12 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - Base del proyecto Spring Boot con entidades, repositorios, conexión a MySQL y datos de prueba.
 - Registro de usuarios (`POST /api/auth/registro`) con validaciones y hash de contraseña.
 - Inicio y cierre de sesión (`POST /api/auth/login`, `POST /api/auth/logout`) y consulta de sesión (`GET /api/auth/sesion`) con Spring Security.
+
+**Operativas / completadas (módulos de Citlaly):**
+
+- Registro de gastos (`POST /api/gastos`) con validaciones de negocio, viaje existente y activo, participación del usuario y respuesta `201 Created` con el gasto y el total gastado del viaje.
+- Edición y eliminación de gastos (`PUT` y `DELETE /api/gastos/{id}`) con permiso solo para el autor o el organizador, recálculo del total del viaje y borrado del archivo de comprobante al eliminar.
+- Entidad `Gasto` con campos de divisas (`monedaOriginal`, `montoOriginal`, `tipoCambio`) y `imagenUrl` para el comprobante, y manejo de errores del módulo con el formato `ErrorResponse(campo, mensaje)` del equipo.
 
 **Pendientes (próxima fase - Backend completo):**
 
@@ -104,13 +113,20 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 
 ---
 
+-**Citlaly**
+
+- **Herramienta utilizada:** Mistral Vibe (extensión en Visual Studio Code), modelo Mistral Medium 3.5
+- **Actividad para la que se utilizó:** Revisión del módulo de gastos (entidad, repositorio, servicio, controlador, DTOs y manejo de excepciones) para detectar errores, sus causas y propuestas de solución. El API de gastos se desarrolló antes sin IA, después de la revisión se aplicaron correcciones.
+- **Código o contenido generado:** Solo revisión y propuestas, sin modificar archivos: la IA señaló como crítico que faltaba el endpoint `POST /api/gastos`, que `GastoRequest` no incluía `viajeId` ni los campos de divisas, que `GastoResponse` no devolvía `viajeId` y que `GlobalExceptionHandler` devolvía un mapa en lugar de `ErrorResponse`.
+- **Modificaciones realizadas por el equipo:** Se agregó `POST /api/gastos` con su lógica de registro, se agregaron `viajeId` y los campos de divisas a `GastoRequest`, `viajeId` a `GastoResponse`, `existeParticipacion` al repositorio y el formato `ErrorResponse` al manejador de excepciones. Los hallazgos sobre presupuesto, balance y frontend no se tomaron como errores, porque corresponden a entregas posteriores.
+- **Forma en que se verificó el resultado:** Pruebas manuales con `cURL` contra el servidor local (puerto 8081): actualización de gasto propio (200), monto en cero (400), gasto inexistente (404), usuario sin permiso (403) y eliminación (204), con verificación en la tabla `gasto` de MySQL. El detalle completo se encuentra en `documentacion/reportes/ia-desarrollo/citlaly/r-ia-dev-s01.md`.
+
 # 6. Participación individual
 
 - **Stephanie Elizdeth Hernández Prieto:** Implementación de **Crear viaje** (endpoint `POST /api/viajes`, DTOs `ViajeRequest`/`ViajeResponse`, validaciones y servicio transaccional para registrar al creador como `ORGANIZADOR`), implementación de **Ver mis viajes** (endpoint `GET /api/viajes` y consulta JPQL filtrando viajes activos del usuario en sesión), pruebas con `cURL` y verificación en MySQL.
 - **Dana Carmona Santamaría:** Creó la base del proyecto con sus entidades, repositorios, configuración de seguridad y datos de prueba. Implementó el registro de usuarios con validaciones y hash de contraseña, y configuró el inicio y cierre de sesión con Spring Security. Hizo pruebas con `cURL` y revisó los datos en MySQL.
 - **Diego Rafael Jiménez Trujano:** Implementación de **Detalle del viaje por días** (endpoint `GET /api/viajes/{id}`, DTOs `ViajeDetalleResponse`/`DiaResponse`/`ActividadResponse`, servicio con consultas sin N+1 y validación de participación) e implementación de **Proponer actividad** (endpoint `POST /api/viajes/{id}/actividades`, DTO `ActividadRequest` con validaciones y servicio que registra al autor desde la sesión), pruebas con `cURL` y verificación en MySQL.
-- **Alfonso Mendoza Vásquez:** *(Completar)*
-- **Citlaly Morales Viveros:** *(Completar)*
+- **Citlaly Morales Viveros:** Implementación de **Registrar gasto** (endpoint `POST /api/gastos`, entidad `Gasto`, `GastoService`, `GastoRepository` y DTOs `GastoRequest`/`GastoResponse`/`GastoRegistradoResponse`, con validaciones de monto, concepto, categoría, moneda y participación en el viaje) e implementación de **Editar y eliminar gasto** ( endpoints `PUT` y `DELETE /api/gastos/{id}`, permiso solo para el autor o el organizador, recálculo del total del viaje y borrado del comprobante al eliminar), corrección del manejo de errores del módulo al formato `ErrorResponse` y pruebas con `cURL` y verificación en MySQL.
 
 ---
 
@@ -120,8 +136,4 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - Actividad 2: Implementar edición y cancelación lógica de viajes (`PUT` y `DELETE /api/viajes/{id}`) — **Editar y eliminar actividades**.
 - Actividad 3: Implementar edición y eliminación de actividades (`PUT /api/actividades/{id}` y `DELETE /api/actividades/{id}`) y filtros de actividades por día y costo máximo.
 - Implementar el manejo uniforme de errores HTTP y revisar que los endpoints de la fase 2 cumplan el formato {codigo, mensaje} **Manejo uniforme de errores HTTP**.
-- *(Espacio para próximas actividades del resto del equipo)*
-
 ---
-
-## Observaciones adicionales
