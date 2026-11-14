@@ -38,13 +38,13 @@ public class ViajeController {
         if (autenticacion == null || !autenticacion.isAuthenticated()
                 || autenticacion instanceof AnonymousAuthenticationToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("sesion", "Debes iniciar sesión para crear un viaje"));
+                    .body(new ErrorResponse(401, "Debes iniciar sesión para crear un viaje"));
         }
 
         if (resultado.hasErrors()) {
             FieldError error = resultado.getFieldError();
             return ResponseEntity.badRequest()
-                    .body(new ErrorResponse(error.getField(), error.getDefaultMessage()));
+                    .body(ErrorResponse.validacion(error.getField(), error.getDefaultMessage()));
         }
 
         try {
@@ -53,7 +53,7 @@ public class ViajeController {
             return ResponseEntity.status(HttpStatus.CREATED).body(viajeCreado);
         } catch (ValidacionViajeException e) {
             return ResponseEntity.badRequest()
-                    .body(new ErrorResponse(e.getCampo(), e.getMessage()));
+                    .body(ErrorResponse.validacion(e.getCampo(), e.getMessage()));
         }
     }
 
@@ -63,7 +63,7 @@ public class ViajeController {
         if (autenticacion == null || !autenticacion.isAuthenticated()
                 || autenticacion instanceof AnonymousAuthenticationToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("sesion", "Debes iniciar sesión para ver tus viajes"));
+                    .body(new ErrorResponse(401, "Debes iniciar sesión para ver tus viajes"));
         }
 
         String correoUsuario = autenticacion.getName();
@@ -80,13 +80,13 @@ public class ViajeController {
         if (autenticacion == null || !autenticacion.isAuthenticated()
                 || autenticacion instanceof AnonymousAuthenticationToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("sesion", "Debes iniciar sesión para editar un viaje"));
+                    .body(new ErrorResponse(401, "Debes iniciar sesión para editar un viaje"));
         }
 
         if (resultado.hasErrors()) {
             FieldError error = resultado.getFieldError();
             return ResponseEntity.badRequest()
-                    .body(new ErrorResponse(error.getField(), error.getDefaultMessage()));
+                    .body(ErrorResponse.validacion(error.getField(), error.getDefaultMessage()));
         }
 
         ViajeResponse actualizado = viajeService.editarViaje(viajeId, solicitud, autenticacion.getName());
@@ -100,7 +100,7 @@ public class ViajeController {
         if (autenticacion == null || !autenticacion.isAuthenticated()
                 || autenticacion instanceof AnonymousAuthenticationToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("sesion", "Debes iniciar sesión para cancelar un viaje"));
+                    .body(new ErrorResponse(401, "Debes iniciar sesión para cancelar un viaje"));
         }
 
         viajeService.cancelarViaje(viajeId, autenticacion.getName());

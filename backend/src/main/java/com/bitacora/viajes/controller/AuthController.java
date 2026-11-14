@@ -51,15 +51,15 @@ public class AuthController {
         if (resultado.hasErrors()) {
             FieldError error = resultado.getFieldError();
             return ResponseEntity.badRequest()
-                    .body(new ErrorResponse(error.getField(), error.getDefaultMessage()));
+                    .body(ErrorResponse.validacion(error.getField(), error.getDefaultMessage()));
         }
         try {
             Usuario usuario = usuarioService.registrar(solicitud);
             return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.desde(usuario));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("correo", MENSAJE_CORREO_REPETIDO));
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, MENSAJE_CORREO_REPETIDO));
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("correo", MENSAJE_CORREO_REPETIDO));
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, MENSAJE_CORREO_REPETIDO));
         }
     }
 
@@ -69,7 +69,7 @@ public class AuthController {
         if (resultado.hasErrors()) {
             FieldError error = resultado.getFieldError();
             return ResponseEntity.badRequest()
-                    .body(new ErrorResponse(error.getField(), error.getDefaultMessage()));
+                    .body(ErrorResponse.validacion(error.getField(), error.getDefaultMessage()));
         }
         try {
             Authentication autenticacion = authenticationManager.authenticate(
@@ -93,7 +93,7 @@ public class AuthController {
         } catch (AuthenticationException e) {
             // El mensaje no dice si falló el correo o la contraseña.
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("credenciales", MENSAJE_CREDENCIALES));
+                    .body(new ErrorResponse(401, MENSAJE_CREDENCIALES));
         }
     }
 
@@ -112,7 +112,7 @@ public class AuthController {
         if (autenticacion == null || !autenticacion.isAuthenticated()
                 || autenticacion instanceof AnonymousAuthenticationToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("sesion", "No hay una sesión iniciada"));
+                    .body(new ErrorResponse(401, "No hay una sesión iniciada"));
         }
         Usuario usuario = usuarioService.buscarPorCorreo(autenticacion.getName());
         return ResponseEntity.ok(UsuarioResponse.desde(usuario));
