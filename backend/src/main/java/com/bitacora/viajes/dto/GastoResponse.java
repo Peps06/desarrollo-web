@@ -1,11 +1,10 @@
 // HU-15 | Responsable: Citlaly | DTO de salida con los datos de un gasto.
 package com.bitacora.viajes.dto;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 import com.bitacora.viajes.model.CategoriaGasto;
 import com.bitacora.viajes.model.Gasto;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * Representación de un gasto que se regresa al cliente.
@@ -15,6 +14,7 @@ import com.bitacora.viajes.model.Gasto;
 public class GastoResponse {
 
     private Integer id;
+    private Integer viajeId;
     private String concepto;
     private CategoriaGasto categoria;
     private BigDecimal monto;
@@ -23,6 +23,7 @@ public class GastoResponse {
 
     public GastoResponse(Gasto gasto) {
         this.id = gasto.getId();
+        this.viajeId = gasto.getViaje().getId();
         this.concepto = gasto.getConcepto();
         this.categoria = gasto.getCategoria();
         this.monto = gasto.getMonto();
@@ -32,6 +33,10 @@ public class GastoResponse {
 
     public Integer getId() {
         return id;
+    }
+
+    public Integer getViajeId() {
+        return viajeId;
     }
 
     public String getConcepto() {

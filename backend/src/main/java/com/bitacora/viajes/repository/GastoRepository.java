@@ -26,4 +26,10 @@ public interface GastoRepository extends JpaRepository<Gasto, Integer> {
     boolean esRolEnViaje(@Param("viajeId") Integer viajeId,
             @Param("usuarioId") Integer usuarioId,
             @Param("rol") RolParticipante rol);
+
+    // Revisa si el usuario participa en el viaje, sin importar el rol
+    @Query("select count(p) > 0 from ParticipanteViaje p "
+            + "where p.viaje.id = :viajeId and p.usuario.id = :usuarioId")
+    boolean existeParticipacion(@Param("viajeId") Integer viajeId,
+            @Param("usuarioId") Integer usuarioId);
 }
