@@ -1,14 +1,22 @@
 package com.bitacora.viajes.model;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "gasto")
@@ -54,27 +62,90 @@ public class Gasto {
     @ColumnDefault("CURRENT_TIMESTAMP")
     private LocalDateTime fecha = LocalDateTime.now();
 
-    public Gasto() {}
+    public Gasto() {
+    }
 
-    public Integer getId() { return id; }
-    public Viaje getViaje() { return viaje; }
-    public void setViaje(Viaje viaje) { this.viaje = viaje; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public String getConcepto() { return concepto; }
-    public void setConcepto(String concepto) { this.concepto = concepto; }
-    public CategoriaGasto getCategoria() { return categoria; }
-    public void setCategoria(CategoriaGasto categoria) { this.categoria = categoria; }
-    public BigDecimal getMonto() { return monto; }
-    public void setMonto(BigDecimal monto) { this.monto = monto; }
-    public String getMonedaOriginal() { return monedaOriginal; }
-    public void setMonedaOriginal(String monedaOriginal) { this.monedaOriginal = monedaOriginal; }
-    public BigDecimal getMontoOriginal() { return montoOriginal; }
-    public void setMontoOriginal(BigDecimal montoOriginal) { this.montoOriginal = montoOriginal; }
-    public BigDecimal getTipoCambio() { return tipoCambio; }
-    public void setTipoCambio(BigDecimal tipoCambio) { this.tipoCambio = tipoCambio; }
-    public String getImagenUrl() { return imagenUrl; }
-    public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
-    public LocalDateTime getFecha() { return fecha; }
-    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+    public Integer getId() {
+        return id;
+    }
+
+    public Viaje getViaje() {
+        return viaje;
+    }
+
+    public void setViaje(Viaje viaje) {
+        this.viaje = viaje;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getConcepto() {
+        return concepto;
+    }
+
+    public void setConcepto(String concepto) {
+        this.concepto = concepto;
+    }
+
+    public CategoriaGasto getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(CategoriaGasto categoria) {
+        this.categoria = categoria;
+    }
+
+    public BigDecimal getMonto() {
+        return monto;
+    }
+
+    public void setMonto(BigDecimal monto) {
+        this.monto = monto;
+    }
+
+    public String getMonedaOriginal() {
+        return monedaOriginal;
+    }
+
+    public void setMonedaOriginal(String monedaOriginal) {
+        this.monedaOriginal = monedaOriginal;
+    }
+
+    public BigDecimal getMontoOriginal() {
+        return montoOriginal;
+    }
+
+    public void setMontoOriginal(BigDecimal montoOriginal) {
+        this.montoOriginal = montoOriginal;
+    }
+
+    public BigDecimal getTipoCambio() {
+        return tipoCambio;
+    }
+
+    public void setTipoCambio(BigDecimal tipoCambio) {
+        this.tipoCambio = tipoCambio;
+    }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
+    }
+
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDateTime fecha) {
+        this.fecha = fecha;
+    }
 }

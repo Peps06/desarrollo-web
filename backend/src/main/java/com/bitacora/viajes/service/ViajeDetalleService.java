@@ -36,10 +36,10 @@ public class ViajeDetalleService {
     private final GastoRepository gastoRepository;
 
     public ViajeDetalleService(ViajeRepository viajeRepository,
-                               ParticipanteViajeRepository participanteViajeRepository,
-                               ActividadRepository actividadRepository,
-                               VotoRepository votoRepository,
-                               GastoRepository gastoRepository) {
+            ParticipanteViajeRepository participanteViajeRepository,
+            ActividadRepository actividadRepository,
+            VotoRepository votoRepository,
+            GastoRepository gastoRepository) {
         this.viajeRepository = viajeRepository;
         this.participanteViajeRepository = participanteViajeRepository;
         this.actividadRepository = actividadRepository;
@@ -106,6 +106,7 @@ public class ViajeDetalleService {
 
     // Error de negocio con el código HTTP que le corresponde y el campo afectado.
     public static class ErrorNegocioException extends RuntimeException {
+
         private final HttpStatus estado;
         private final String campo;
 
