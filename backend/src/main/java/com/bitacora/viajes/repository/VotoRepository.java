@@ -2,11 +2,19 @@ package com.bitacora.viajes.repository;
 
 import com.bitacora.viajes.model.Voto;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface VotoRepository extends JpaRepository<Voto, Integer> {
+
+    // HU-14: voto de un usuario sobre una actividad, si existe.
+    // Spring Data arma la consulta a partir del nombre del método.
+    Optional<Voto> findByActividadIdAndUsuarioId(Integer actividadId, Integer usuarioId);
+
+    // HU-14: cuántos votos tiene una actividad.
+    long countByActividadId(Integer actividadId);
 
     // Total de votos por actividad en un viaje y cuántos son del usuario indicado.
     // Solo devuelve las actividades que tienen al menos un voto.
