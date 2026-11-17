@@ -16,6 +16,10 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - Los errores inesperados responden con un mensaje general, sin mostrar detalles internos.
 - Se implementaron los endpoints para gestionar los participantes de un viaje (`GET`, `POST` y `DELETE /api/viajes/{id}/participantes`), permitiendo listar integrantes, agregar nuevos participantes registrados por correo electrónico y remover participantes con control de permisos exclusivo para el organizador.
 - Se implementaron los endpoints para editar y cancelar viajes (`PUT` y `DELETE /api/viajes/{id}`), validando la integridad de las fechas frente a actividades ya programadas en el itinerario y aplicando borrado lógico mediante cambio de estado a `CANCELADO`.
+- Se implementó la edición de actividades (`PUT /api/actividades/{id}`) con las mismas validaciones que al proponer una actividad. Solo el autor de la actividad o el organizador del viaje pueden editarla; los demás reciben 403. Responde 200 con la actividad actualizada, su total de votos y si el usuario en sesión ya votó.
+- Se implementó la eliminación de actividades (`DELETE /api/actividades/{id}`), que responde 204 y elimina sus votos en la misma transacción. La actividad deja de aparecer en el detalle del viaje.
+- Se agregó el filtro de actividades `GET /api/viajes/{id}/actividades?dia=yyyy-MM-dd&costoMax=500` y los filtros `destino` y `rol` en `GET /api/viajes`. Son opcionales y combinables, y se aplican en la consulta a la base de datos. Un rol inválido o una fecha mal formada responden 400, y un filtro sin resultados responde 200 con lista vacía.
+- El orden de las respuestas de error es 404 (no existe), 403 (sin permiso) y 400 (datos inválidos).
 - *(Espacio para que los demás integrantes agreguen sus actividades)*
 
 ---
@@ -27,6 +31,7 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 | Manejo uniforme de errores HTTP y formato único de respuesta | Dana Carmona Santamaria | [https://github.com/Peps06/desarrollo-web/commit/e5f4e](https://github.com/Peps06/desarrollo-web/commit/e5f4e8e965130cc7c9cd91d068bfefdc7105c63e) |
 | Gestionar participantes del viaje (`GET`, `POST` y `DELETE /api/viajes/{id}/participantes`) | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/f5fe7b9](https://github.com/Peps06/desarrollo-web/commit/f5fe7b9) |
 | Editar y cancelar viaje (`PUT` y `DELETE /api/viajes/{id}`) | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/e5ecb26](https://github.com/Peps06/desarrollo-web/commit/e5ecb26) |
+| Edición y eliminación de actividades (`PUT` y `DELETE /api/actividades/{id}`) y filtros de búsqueda de actividades y viajes | Diego Jiménez | [https://github.com/Peps06/desarrollo-web/commit/d58e19e](https://github.com/Peps06/desarrollo-web/commit/d58e19e) |
 | *(Espacio para actividades de los demás integrantes)* | | |
 
 ---
@@ -36,6 +41,8 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - **Respuestas 401 en todas las pruebas:** Las pruebas con cURL respondían 401 aunque la petición fuera válida. La causa fue que el archivo de cookies no tenía una sesión activa[cite: 46]. Se resolvió iniciando sesión otra vez antes de repetir las pruebas.
 - **Error de sintaxis HQL al iniciar Spring Boot en consultas de participantes:** Al arrancar la aplicación, Hibernate lanzó una excepción de sintaxis porque faltaba un espacio en blanco al concatenar las cadenas JPQL entre `JOIN FETCH p.usuario` y `WHERE`. Se solucionó agregando el espacio correspondiente en el repositorio y recompilando.
 - **Invalidación de sesiones al comprobar persistencia tras reiniciar el servidor:** Al detener y reiniciar Spring Boot para verificar la persistencia en MySQL, las peticiones `cURL` devolvían `401` porque Spring Security almacena los `JSESSIONID` en memoria. Se solucionó renovando la cookie mediante `POST /api/auth/login` antes de consultar `GET /api/viajes`.
+- **Error de conexión a MySQL al arrancar:** La aplicación no arrancaba con `Access denied for user 'bitacora_app'`. Había dos servidores MySQL en el equipo: el servicio `MySQL80` de Windows y el de WSL, ambos en el puerto 3306, y la aplicación en Windows se conectaba al que no tenía el usuario. Se resolvió corriendo la aplicación desde WSL.
+- **Puerto 8080 ocupado:** Las peticiones respondían 404 con una página de Jetty porque otro programa usaba el puerto 8080. La aplicación se arrancó en el puerto 8081 para las pruebas.
 - *(Espacio para los problemas de los demás integrantes)*
 
 ---
@@ -54,9 +61,11 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - Edición de datos generales de un viaje (`PUT /api/viajes/{id}`) con validación de conflictos cuando se acortan fechas y existen actividades fuera del nuevo rango.
 - Cancelación lógica de viajes (`DELETE /api/viajes/{id}`) cambiando su estado a `CANCELADO` para ocultarlos del listado activo de todos los participantes sin perder integridad referencial en MySQL.
 
-**Operativas / completadas (módulos de los demás integrantes):**
+**Operativas / completadas (módulos de Diego):**
 
-- *(Espacio para completar)*
+- Edición de actividades (`PUT /api/actividades/{id}`) con permiso solo para el autor o el organizador, y respuesta con total de votos y voto del usuario.
+- Eliminación de actividades (`DELETE /api/actividades/{id}`) con borrado de sus votos en la misma transacción.
+- Filtros de actividades por día y costo máximo (`GET /api/viajes/{id}/actividades`) y de viajes por destino y rol (`GET /api/viajes`), opcionales y combinables.
 
 **Pendientes:**
 
@@ -86,6 +95,14 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 
 ---
 
+-**Diego**
+
+- **Herramienta utilizada:** Claude (Anthropic)
+- **Actividad para la que se utilizó:** Apoyo en la codificación de la edición y eliminación de actividades en `ActividadController` y `ActividadService`, los filtros de actividades y de viajes, y las consultas JPQL de `ActividadRepository` y `ParticipanteViajeRepository`.
+- **Código o contenido generado:** Los métodos de editar, eliminar y listar actividades, la verificación de permisos, las consultas con parámetros opcionales y el borrado de votos, además de los comandos de prueba.
+- **Modificaciones realizadas por el equipo:** No se modificó el código generado antes del commit. Se reutilizaron `ActividadRequest`, `ActividadResponse`, `buscarParticipacion` y `ErrorNegocioException`, y los cambios en `ViajeController`, `ViajeService` y `ParticipanteViajeRepository` se limitaron a agregar los filtros opcionales.
+- **Forma en que se verificó el resultado:** Compilación y pruebas manuales hechas por mí con PowerShell y sesión por cookie: filtros solos y combinados, editar una actividad propia (200) y ajena (403), eliminar una actividad con votos (204) y comprobación en MySQL de que sus votos desaparecen, y los casos 404 y 400. El detalle completo se encuentra en `documentacion/reportes/ia-desarrollo/diego/r-ia-dev-s02.md` y en `documentacion/reportes/ia-documental/diego/r-ia-doc-s02.md`.
+
 - *(Espacio para el uso de IA de los demás integrantes)*
 
 ---
@@ -94,7 +111,7 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 
 - **Stephanie Elizdeth Hernández Prieto:** Implementó los endpoints para gestionar participantes del viaje (`GET`, `POST` y `DELETE /api/viajes/{id}/participantes`) y para editar y cancelar viajes (`PUT` y `DELETE /api/viajes/{id}`), incorporando validaciones de permisos de organizador, conflictos de fechas con actividades, borrado lógico y pruebas de persistencia con `cURL` en WSL.
 - **Dana Carmona Santamaría:** Creó el manejo común de errores HTTP y el formato de respuesta de toda la API. Configuró las respuestas 401 y 403 en JSON y revisó las respuestas de error con pruebas de cURL.
-- **Diego Rafael Jiménez Trujano:** *(Completar)*
+- **Diego Rafael Jiménez Trujano:** Implementación de **Editar y eliminar actividades** (endpoints `PUT` y `DELETE /api/actividades/{id}`, permiso solo para el autor o el organizador, borrado de los votos de la actividad en la misma transacción) e implementación de **Filtros de búsqueda** (`GET /api/viajes/{id}/actividades` por día y costo máximo, y `destino` y `rol` en `GET /api/viajes`), pruebas con PowerShell y verificación en MySQL.
 - **Alfonso Mendoza Vásquez:** *(Completar)*
 - **Citlaly Morales Viveros:** *(Completar)*
 
