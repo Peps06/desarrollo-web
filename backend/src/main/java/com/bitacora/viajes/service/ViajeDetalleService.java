@@ -1,5 +1,6 @@
 package com.bitacora.viajes.service;
 
+import com.bitacora.viajes.dto.ActividadMasVotadaResponse;
 import com.bitacora.viajes.dto.ActividadResponse;
 import com.bitacora.viajes.dto.DiaResponse;
 import com.bitacora.viajes.dto.ViajeDetalleResponse;
@@ -34,17 +35,20 @@ public class ViajeDetalleService {
     private final ActividadRepository actividadRepository;
     private final VotoRepository votoRepository;
     private final GastoRepository gastoRepository;
+    private final ActividadGanadoraService actividadGanadoraService;
 
     public ViajeDetalleService(ViajeRepository viajeRepository,
             ParticipanteViajeRepository participanteViajeRepository,
             ActividadRepository actividadRepository,
             VotoRepository votoRepository,
-            GastoRepository gastoRepository) {
+            GastoRepository gastoRepository,
+            ActividadGanadoraService actividadGanadoraService) {
         this.viajeRepository = viajeRepository;
         this.participanteViajeRepository = participanteViajeRepository;
         this.actividadRepository = actividadRepository;
         this.votoRepository = votoRepository;
         this.gastoRepository = gastoRepository;
+        this.actividadGanadoraService = actividadGanadoraService;
     }
 
     // Arma el detalle del viaje con una consulta por cada tipo de dato (participación, participantes,
@@ -63,14 +67,19 @@ public class ViajeDetalleService {
                 .collect(Collectors.toMap(ConteoVotos::getActividadId, Function.identity()));
 
         // Las actividades llegan ordenadas por día y hora, y agrupar conserva ese orden dentro de cada día.
-        Map<LocalDate, List<ActividadResponse>> actividadesPorDia = actividadRepository.buscarPorViaje(viajeId)
+        List<Actividad> actividades = actividadRepository.buscarPorViaje(viajeId);
+        Map<LocalDate, List<ActividadResponse>> actividadesPorDia = actividades
                 .stream()
                 .collect(Collectors.groupingBy(Actividad::getDia,
                         Collectors.mapping(a -> aRespuesta(a, votos.get(a.getId())), Collectors.toList())));
 
+        // HU-22: actividad más votada de cada día (null si no hay votos o hay empate total).
+        Map<LocalDate, ActividadMasVotadaResponse> ganadoras = actividadGanadoraService.calcularPorDia(actividades, votos);
+
         // Un día por cada fecha del viaje, aunque no tenga actividades.
         List<DiaResponse> dias = viaje.getFechaInicio().datesUntil(viaje.getFechaFin().plusDays(1))
-                .map(fecha -> new DiaResponse(fecha, actividadesPorDia.getOrDefault(fecha, List.of())))
+                .map(fecha -> new DiaResponse(fecha, actividadesPorDia.getOrDefault(fecha, List.of()),
+                        ganadoras.get(fecha)))
                 .toList();
 
         BigDecimal totalGastado = gastoRepository.sumarMontoPorViaje(viajeId);
