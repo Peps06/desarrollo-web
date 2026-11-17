@@ -16,7 +16,9 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - Los errores inesperados responden con un mensaje general, sin mostrar detalles internos.
 - Se implementaron los endpoints para gestionar los participantes de un viaje (`GET`, `POST` y `DELETE /api/viajes/{id}/participantes`), permitiendo listar integrantes, agregar nuevos participantes registrados por correo electrónico y remover participantes con control de permisos exclusivo para el organizador.
 - Se implementaron los endpoints para editar y cancelar viajes (`PUT` y `DELETE /api/viajes/{id}`), validando la integridad de las fechas frente a actividades ya programadas en el itinerario y aplicando borrado lógico mediante cambio de estado a `CANCELADO`.
-- *(Espacio para que los demás integrantes agreguen sus actividades)*
+- Se agregaron los endpoints para editar y eliminar actividades (`PUT` y `DELETE /api/actividades/{id}`) y para listar las actividades de un viaje con filtros opcionales por día y por costo máximo (`GET /api/viajes/{id}/actividades?dia=&costoMax=`).
+- Se agregó el listado de los viajes activos del usuario en sesión (`GET /api/viajes`) con filtros opcionales y combinables por destino y por rol (organizador o participante).
+- Se agregó el comprobante opcional al registrar un gasto (`POST /api/gastos` con `multipart/form-data`) y su consulta (`GET /api/gastos/{id}/comprobante`), visible solo para los participantes del viaje.
 
 ---
 
@@ -27,7 +29,8 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 | Manejo uniforme de errores HTTP y formato único de respuesta | Dana Carmona Santamaria | [https://github.com/Peps06/desarrollo-web/commit/e5f4e](https://github.com/Peps06/desarrollo-web/commit/e5f4e8e965130cc7c9cd91d068bfefdc7105c63e) |
 | Gestionar participantes del viaje (`GET`, `POST` y `DELETE /api/viajes/{id}/participantes`) | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/f5fe7b9](https://github.com/Peps06/desarrollo-web/commit/f5fe7b9) |
 | Editar y cancelar viaje (`PUT` y `DELETE /api/viajes/{id}`) | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/e5ecb26](https://github.com/Peps06/desarrollo-web/commit/e5ecb26) |
-| *(Espacio para actividades de los demás integrantes)* | | |
+| Editar, eliminar y filtrar actividades y viajes (`PUT` y `DELETE /api/actividades/{id}`, `GET /api/viajes/{id}/actividades?dia=&costoMax=`, `GET /api/viajes?destino=&rol=`) | Diego Rafael Jiménez Trujano | [https://github.com/Peps06/desarrollo-web/commit/d58e19e](https://github.com/Peps06/desarrollo-web/commit/d58e19effc920030ff78e5a0038e48aa4727d0ed) |
+| Comprobante opcional en gastos y su consulta (`POST /api/gastos` multipart, `GET /api/gastos/{id}/comprobante`) | Citlaly Morales Viveros | [https://github.com/Peps06/desarrollo-web/commit/ec2137d](https://github.com/Peps06/desarrollo-web/commit/ec2137d4f0164c50794aa52e31bb472dc8d4e8d3) |
 
 ---
 
@@ -54,13 +57,16 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - Edición de datos generales de un viaje (`PUT /api/viajes/{id}`) con validación de conflictos cuando se acortan fechas y existen actividades fuera del nuevo rango.
 - Cancelación lógica de viajes (`DELETE /api/viajes/{id}`) cambiando su estado a `CANCELADO` para ocultarlos del listado activo de todos los participantes sin perder integridad referencial en MySQL.
 
-**Operativas / completadas (módulos de los demás integrantes):**
+**Operativas / completadas (módulos de Diego):**
 
-- *(Espacio para completar)*
+- Edición y eliminación de actividades (`PUT` y `DELETE /api/actividades/{id}`).
+- Listado de actividades de un viaje con filtros por día y costo máximo.
+- Listado de los viajes activos del usuario con filtros por destino y rol.
 
-**Pendientes:**
+**Operativas / completadas (módulos de Citlaly):**
 
-- *(Espacio para completar)*
+- Registro de gastos con comprobante opcional (`POST /api/gastos` con `multipart/form-data`).
+- Consulta del comprobante de un gasto (`GET /api/gastos/{id}/comprobante`), visible solo para los participantes del viaje.
 
 ---
 
@@ -84,19 +90,13 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - **Modificaciones realizadas por el equipo:** Ajuste de referencias entre entidades (`getUsuario()`), integración con las excepciones globales de la API y adaptación de escenarios de prueba según los datos precargados en MySQL.
 - **Forma en que se verificó el resultado:** Pruebas con `cURL` en WSL verificando códigos HTTP (`200`, `201`, `204`, `400`, `403`, `404`), validación cruzada con votación y reinicio del servidor para comprobar persistencia en MySQL. El detalle está en `documentacion/reportes/ia-desarrollo/stephanie/` (`r-ia-dev-s02.md`, `r-ia-dev-s03.md`) y en `documentacion/reportes/ia-documental/stephanie/` (`r-ia-doc-s02.md`, `r-ia-doc-s03.md`).
 
----
-
-- *(Espacio para el uso de IA de los demás integrantes)*
-
----
-
 # 6. Participación individual
 
 - **Stephanie Elizdeth Hernández Prieto:** Implementó los endpoints para gestionar participantes del viaje (`GET`, `POST` y `DELETE /api/viajes/{id}/participantes`) y para editar y cancelar viajes (`PUT` y `DELETE /api/viajes/{id}`), incorporando validaciones de permisos de organizador, conflictos de fechas con actividades, borrado lógico y pruebas de persistencia con `cURL` en WSL.
 - **Dana Carmona Santamaría:** Creó el manejo común de errores HTTP y el formato de respuesta de toda la API. Configuró las respuestas 401 y 403 en JSON y revisó las respuestas de error con pruebas de cURL.
-- **Diego Rafael Jiménez Trujano:** *(Completar)*
+- **Diego Rafael Jiménez Trujano:** Implementó la edición y eliminación de actividades (`PUT` y `DELETE /api/actividades/{id}`), el listado de actividades de un viaje con filtros por día y costo máximo, y el listado de los viajes activos del usuario con filtros por destino y rol.
 - **Alfonso Mendoza Vásquez:** *(Completar)*
-- **Citlaly Morales Viveros:** *(Completar)*
+- **Citlaly Morales Viveros:** Agregó el comprobante opcional al registrar un gasto (`POST /api/gastos` con `multipart/form-data`) y su consulta (`GET /api/gastos/{id}/comprobante`), visible solo para los participantes del viaje.
 
 ---
 
@@ -104,10 +104,7 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 
 - Actividad 1: Revisar que los endpoints de los demás integrantes respondan con el formato de error común.
 - Actividad 2: Iniciar el desarrollo de las vistas frontend (formularios, tablas y consumo de la API con `fetch`) para la gestión de viajes y participantes.
-- *(Espacio para próximas actividades del resto del equipo)*
-
 ---
 
 ## Observaciones adicionales
-
-- *(Espacio para observaciones del equipo)*
+En esta entrega el API REST quedó completo: todos los módulos de la API están implementados y comparten el mismo formato de errores, por lo que el frontend podrá consumirlos de forma uniforme. Antes de iniciar las vistas conviene verificar que cada endpoint responda con ese formato, como se plantea en las próximas actividades.
