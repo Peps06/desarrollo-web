@@ -22,6 +22,8 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - Se implementó el módulo de gastos, entidad `Gasto` con monto en `BigDecimal`, categoría, moneda original, monto original y tipo de cambio, campo `imagenUrl` para el comprobante y restricción `@Check(monto > 0)`; repositorio `GastoRepository` con `sumarMontoPorViaje` y `existeParticipacion`; servicio `GastoService` y controlador `GastoController`.
 - Se implementó el endpoint `POST /api/gastos` para registrar un gasto (201 con el gasto creado y el total del viaje). Valida que el viaje exista (404), que esté activo, que el usuario participe en el viaje (403), que el concepto no esté vacío (máx. 150 caracteres), que la categoría sea válida y que el monto sea mayor a cero; si no se mandan los campos de moneda, se asume MXN con tipo de cambio 1.
 - Se implementaron los endpoints `PUT /api/gastos/{id}` y `DELETE /api/gastos/{id}` para editar y eliminar gastos (HU-20, adelantado en esta fase): solo el autor del gasto o el organizador del viaje puede modificarlo (403 en caso contrario); al eliminar, si el gasto tenía comprobante, también se borra el archivo mediante `AlmacenamientoService`. Responden 200 con el total recalculado y 204, respectivamente.
+- Se implementaron los endpoints `POST /api/actividades/{id}/votos` para votar una actividad y `DELETE /api/actividades/{id}/votos` para quitar el voto propio. Ambos toman al usuario de la sesión y devuelven `{actividadId, totalVotos, votadaPorMi}`. Validan actividad inexistente (`404`), usuario que no participa en el viaje (`403`), voto duplicado (`400`) y quitar un voto que no existe (`404`). La restricción `UNIQUE (actividad_id, usuario_id)` de MySQL respalda la regla.
+- Se implementó el endpoint `GET /api/viajes/{id}/presupuesto`, con el cálculo en `PresupuestoService`: total gastado, restante, porcentaje usado, número de participantes y gasto por persona, con `BigDecimal` a 2 decimales. Sin gastos no hay división entre cero y el restante puede ser negativo si se excede el presupuesto. Se agregaron 3 pruebas JUnit.
 
 ---
 
@@ -38,7 +40,12 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 | Inicio y cierre de sesión con Spring Security | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/4f66eed](https://github.com/Peps06/desarrollo-web/commit/4f66eed) |
 | Implementación del API de gastos: entidad `Gasto`, repositorio, servicio, controlador (`PUT` y `DELETE /api/gastos/{id}`), DTOs y excepciones propias | Citlaly Morales | [https://github.com/Peps06/desarrollo-web/commit/e72d585](https://github.com/Peps06/desarrollo-web/commit/e72d585) |
 | Correcciones del módulo de gastos: endpoint `POST /api/gastos`, `viajeId` y campos de divisas en `GastoRequest`, `viajeId` en `GastoResponse`, validaciones de viaje y participación, y `GlobalExceptionHandler` con formato `ErrorResponse` | Citlaly Morales | [https://github.com/Peps06/desarrollo-web/commit/d8fd7f0](https://github.com/Peps06/desarrollo-web/commit/d8fd7f0) |
-
+| Consultas de voto en `VotoRepository` | Alfonso Mendoza | [https://github.com/Peps06/desarrollo-web/commit/33a91c1](https://github.com/Peps06/desarrollo-web/commit/33a91c1) |
+| `VotoService` con validaciones 403/404/400 | Alfonso Mendoza | [https://github.com/Peps06/desarrollo-web/commit/409cadb](https://github.com/Peps06/desarrollo-web/commit/409cadb) |
+| Endpoints `POST` y `DELETE /api/actividades/{id}/votos` | Alfonso Mendoza | [https://github.com/Peps06/desarrollo-web/commit/7c0b87d](https://github.com/Peps06/desarrollo-web/commit/7c0b87d) |
+| Cálculo del presupuesto en `PresupuestoService` | Alfonso Mendoza | [https://github.com/Peps06/desarrollo-web/commit/a583af5](https://github.com/Peps06/desarrollo-web/commit/a583af5) |
+| Endpoint `GET /api/viajes/{id}/presupuesto` | Alfonso Mendoza | [https://github.com/Peps06/desarrollo-web/commit/44c1f8f](https://github.com/Peps06/desarrollo-web/commit/44c1f8f) |
+| Pruebas JUnit de `PresupuestoService` | Alfonso Mendoza | [https://github.com/Peps06/desarrollo-web/commit/2ed0a8d](https://github.com/Peps06/desarrollo-web/commit/2ed0a8d) |
 
 ---
 
@@ -48,6 +55,8 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - **Error de sintaxis JPQL al iniciar Spring Boot:** Se presentó un `QueryCreationException` en `ParticipanteViajeRepository` por falta de un espacio entre el alias de la entidad y la cláusula `WHERE` en la consulta concatenada (`vWHERE`). Se corrigió agregando el espaciado adecuado en la cadena `@Query`.
 - **Redirección `302` en peticiones sin sesión a `/api/viajes`:** Al probar el acceso no autenticado con `cURL`, Spring Security devolvió `302` hacia `/login` en lugar de `401 Unauthorized` debido al orden de los `AuthenticationEntryPoint` en `SecurityConfig.java`. Se documentó el hallazgo para su ajuste en la configuración de seguridad.
 - **Endpoint `POST /api/gastos` faltante en la primera versión del módulo de gastos:** La primera versión solo tenía `PUT` y `DELETE /api/gastos/{id}`. La revisión con IA lo marcó como crítico y se agregó el endpoint con su lógica de registro.
+- **`bad interpreter: /bin/sh^M` al ejecutar `./mvnw` en WSL:** el repositorio se había clonado desde Windows y git convirtió los saltos de línea de `mvnw` a CRLF, que Linux no puede ejecutar. Se corrigió con un ajuste local de git (`mvnw text eol=lf`), sin modificar archivos del repositorio.
+- **Las tablas `actividad` y `gasto` no se creaban al arrancar:** con MySQL 8.4, Hibernate generaba columnas `DATETIME(6) DEFAULT CURRENT_TIMESTAMP`, que MySQL rechaza. Se resolvió creando la base con `database/esquema.sql` antes de arrancar la aplicación.
 ---
 
 # 4. Avance funcional
@@ -73,6 +82,10 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - Registro de gastos (`POST /api/gastos`) con validaciones de negocio, viaje existente y activo, participación del usuario y respuesta `201 Created` con el gasto y el total gastado del viaje.
 - Edición y eliminación de gastos (`PUT` y `DELETE /api/gastos/{id}`) con permiso solo para el autor o el organizador, recálculo del total del viaje y borrado del archivo de comprobante al eliminar.
 - Entidad `Gasto` con campos de divisas (`monedaOriginal`, `montoOriginal`, `tipoCambio`) y `imagenUrl` para el comprobante, y manejo de errores del módulo con el formato `ErrorResponse(campo, mensaje)` del equipo.
+**Operativas / completadas (módulos de Alfonso):**
+
+- Votar y quitar voto (`POST` y `DELETE /api/actividades/{id}/votos`) con el contador actualizado en la respuesta.
+- Consulta del presupuesto (`GET /api/viajes/{id}/presupuesto`) con el cálculo en `PresupuestoService` y 3 pruebas JUnit que pasan.
 
 **Pendientes (próxima fase - Backend completo):**
 
@@ -121,12 +134,25 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - **Modificaciones realizadas por el equipo:** Se agregó `POST /api/gastos` con su lógica de registro, se agregaron `viajeId` y los campos de divisas a `GastoRequest`, `viajeId` a `GastoResponse`, `existeParticipacion` al repositorio y el formato `ErrorResponse` al manejador de excepciones. Los hallazgos sobre presupuesto, balance y frontend no se tomaron como errores, porque corresponden a entregas posteriores.
 - **Forma en que se verificó el resultado:** Pruebas manuales con `cURL` contra el servidor local (puerto 8081): actualización de gasto propio (200), monto en cero (400), gasto inexistente (404), usuario sin permiso (403) y eliminación (204), con verificación en la tabla `gasto` de MySQL. El detalle completo se encuentra en `documentacion/reportes/ia-desarrollo/citlaly/r-ia-dev-s01.md`.
 
+---
+
+-**Alfonso**
+
+- **Herramienta utilizada:** Claude (Anthropic)
+- **Actividad para la que se utilizó:** Apoyo en la codificación de `VotoService`, `VotoController`, `VotoResponse`, `PresupuestoService`, `PresupuestoController`, `PresupuestoResponse` y `PresupuestoServiceTest`, además de la depuración del arranque en WSL.
+- **Código o contenido generado:** Borradores de los servicios, controladores, DTOs y pruebas JUnit, y los comandos `cURL` de prueba.
+- **Modificaciones realizadas por el equipo:** Se reutilizó `ErrorNegocioException` y `buscarParticipacion` de `ViajeDetalleService` para responder con el mismo formato de error que el resto del equipo. No se modificaron archivos de otros integrantes: se revirtieron los cambios hechos a `Actividad.java` y `Gasto.java` durante la depuración.
+- **Forma en que se verificó el resultado:** Pruebas con `cURL` y cookie de sesión (`200`, `201`, `400`, `401`, `403` y `404`), comparación del presupuesto con una consulta en MySQL y pruebas JUnit con `./mvnw test`. El detalle completo se encuentra en `documentacion/reportes/ia-desarrollo/alfonso/`.
+
+---
+
 # 6. Participación individual
 
 - **Stephanie Elizdeth Hernández Prieto:** Implementación de **Crear viaje** (endpoint `POST /api/viajes`, DTOs `ViajeRequest`/`ViajeResponse`, validaciones y servicio transaccional para registrar al creador como `ORGANIZADOR`), implementación de **Ver mis viajes** (endpoint `GET /api/viajes` y consulta JPQL filtrando viajes activos del usuario en sesión), pruebas con `cURL` y verificación en MySQL.
 - **Dana Carmona Santamaría:** Creó la base del proyecto con sus entidades, repositorios, configuración de seguridad y datos de prueba. Implementó el registro de usuarios con validaciones y hash de contraseña, y configuró el inicio y cierre de sesión con Spring Security. Hizo pruebas con `cURL` y revisó los datos en MySQL.
 - **Diego Rafael Jiménez Trujano:** Implementación de **Detalle del viaje por días** (endpoint `GET /api/viajes/{id}`, DTOs `ViajeDetalleResponse`/`DiaResponse`/`ActividadResponse`, servicio con consultas sin N+1 y validación de participación) e implementación de **Proponer actividad** (endpoint `POST /api/viajes/{id}/actividades`, DTO `ActividadRequest` con validaciones y servicio que registra al autor desde la sesión), pruebas con `cURL` y verificación en MySQL.
 - **Citlaly Morales Viveros:** Implementación de **Registrar gasto** (endpoint `POST /api/gastos`, entidad `Gasto`, `GastoService`, `GastoRepository` y DTOs `GastoRequest`/`GastoResponse`/`GastoRegistradoResponse`, con validaciones de monto, concepto, categoría, moneda y participación en el viaje) e implementación de **Editar y eliminar gasto** ( endpoints `PUT` y `DELETE /api/gastos/{id}`, permiso solo para el autor o el organizador, recálculo del total del viaje y borrado del comprobante al eliminar), corrección del manejo de errores del módulo al formato `ErrorResponse` y pruebas con `cURL` y verificación en MySQL.
+- **Alfonso Mendoza Vásquez:** Implementación de **Votar actividad y quitar voto** (endpoints `POST` y `DELETE /api/actividades/{id}/votos`, `VotoResponse` y `VotoService` con validaciones de actividad inexistente, no participante, voto duplicado y voto inexistente) e implementación de **Consultar presupuesto** (endpoint `GET /api/viajes/{id}/presupuesto`, `PresupuestoResponse`, cálculo en `PresupuestoService` con `BigDecimal` y 3 pruebas JUnit), pruebas con `cURL` y verificación en MySQL. Además configuró el WSL del proyecto con MySQL y documentó los problemas de arranque.
 
 ---
 
@@ -136,4 +162,6 @@ Durante esta fase avanzamos en el desarrollo de **Backend básico (Entregable 2:
 - Actividad 2: Implementar edición y cancelación lógica de viajes (`PUT` y `DELETE /api/viajes/{id}`) — **Editar y eliminar actividades**.
 - Actividad 3: Implementar edición y eliminación de actividades (`PUT /api/actividades/{id}` y `DELETE /api/actividades/{id}`) y filtros de actividades por día y costo máximo.
 - Implementar el manejo uniforme de errores HTTP y revisar que los endpoints de la fase 2 cumplan el formato {codigo, mensaje} **Manejo uniforme de errores HTTP**.
+
+- Actividad 4: Implementar el cálculo de la actividad más votada por día (`ActividadGanadoraService`) y el balance de deudas del grupo (`BalanceService`).
 ---
