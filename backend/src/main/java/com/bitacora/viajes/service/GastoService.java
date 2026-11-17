@@ -17,13 +17,15 @@ import com.bitacora.viajes.repository.UsuarioRepository;
 import com.bitacora.viajes.repository.ViajeRepository;
 import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Registro, edición y eliminación de gastos con control de permisos.
  *
- * @author Citlaly Morales Viveros
+ * Autora: Citlaly Morales Viveros
  */
 @Service
 public class GastoService {
@@ -45,6 +47,14 @@ public class GastoService {
      */
     @Transactional
     public GastoRegistradoResponse registrar(GastoRequest request, String email) {
+        return registrar(request, email, null);
+    }
+
+    /**
+     * Registra un gasto y, si se mandó, guarda también su comprobante.
+     */
+    @Transactional
+    public GastoRegistradoResponse registrar(GastoRequest request, String email, MultipartFile comprobante) {
         validarDatos(request);
         if (request.getViajeId() == null) {
             throw new DatosInvalidosException("El viaje es obligatorio");
@@ -74,6 +84,11 @@ public class GastoService {
         gasto.setMonedaOriginal(moneda);
         gasto.setMontoOriginal(montoOriginal);
         gasto.setTipoCambio(tipoCambio);
+
+        // El comprobante es opcional
+        if (comprobante != null && !comprobante.isEmpty()) {
+            gasto.setImagenUrl(almacenamientoService.guardar(comprobante));
+        }
 
         Gasto guardado = gastoRepository.save(gasto);
         BigDecimal total = gastoRepository.sumarMontoPorViaje(viaje.getId());
@@ -115,6 +130,23 @@ public class GastoService {
         if (comprobante != null && !comprobante.isBlank()) {
             almacenamientoService.eliminar(comprobante);
         }
+    }
+
+    /**
+     * Regresa el comprobante de un gasto. Solo lo ven los participantes del viaje.
+     */
+    @Transactional(readOnly = true)
+    public Resource obtenerComprobante(Integer id, String email) {
+        Gasto gasto = buscarGasto(id);
+        Usuario usuario = buscarUsuario(email);
+
+        if (!gastoRepository.existeParticipacion(gasto.getViaje().getId(), usuario.getId())) {
+            throw new AccesoDenegadoException("No participas en este viaje");
+        }
+        if (gasto.getImagenUrl() == null || gasto.getImagenUrl().isBlank()) {
+            throw new RecursoNoEncontradoException("Este gasto no tiene comprobante");
+        }
+        return almacenamientoService.cargar(gasto.getImagenUrl());
     }
 
     private Gasto buscarGasto(Integer id) {
