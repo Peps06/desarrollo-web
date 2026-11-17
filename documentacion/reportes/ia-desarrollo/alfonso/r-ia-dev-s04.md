@@ -19,8 +19,8 @@ Implementación de `ActividadGanadoraService`, que elige la actividad más votad
 | **Modelo/temperatura** | Claude Opus 5.5 |
 | **Prompt original** | [Ver prompt original](#prompt-original) |
 | **Respuesta de IA** | [Ver resumen de respuesta](#respuesta-de-ia) |
-| **Código anterior** | Commit `4e36d81a5e8eb72dabbbe17ff3304f49e71bfe75` (HU-21: balance de deudas del grupo con transferencias y pruebas JUnit) |
-| **Código posterior** | Commit `205d3a4b34941457549c547cdfc083f525dd544c` (HU-22: actividad más votada por día en el detalle del viaje) |
+| **Código anterior** | Commit `7b106317903d6e29a20e93d35448e7520f315114` (HU-21: balance de deudas del grupo con transferencias y pruebas JUnit) |
+| **Código posterior** | Commit `69055cd68932db10811078432731a43611e07ec7` (HU-22: actividad más votada por día en el detalle del viaje) |
 | **Diferencias entre versiones** | [Ver diferencias](#diferencias-entre-versiones) |
 | **Prueba de funcionamiento** | [Ver salida de pruebas](#pruebas) |
 | **Código de uso** | Generación |

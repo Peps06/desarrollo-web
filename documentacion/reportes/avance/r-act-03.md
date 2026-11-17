@@ -25,6 +25,8 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - Se implementó la eliminación de actividades (`DELETE /api/actividades/{id}`), que responde 204 y elimina sus votos en la misma transacción. La actividad deja de aparecer en el detalle del viaje.
 - Se agregó el filtro de actividades `GET /api/viajes/{id}/actividades?dia=yyyy-MM-dd&costoMax=500` y los filtros `destino` y `rol` en `GET /api/viajes`. Son opcionales y combinables, y se aplican en la consulta a la base de datos. Un rol inválido o una fecha mal formada responden 400, y un filtro sin resultados responde 200 con lista vacía.
 - El orden de las respuestas de error es 404 (no existe), 403 (sin permiso) y 400 (datos inválidos).
+- Se implementó el balance de deudas del grupo (`GET /api/viajes/{id}/balance`): calcula la cuota por persona, el saldo de cada participante (lo que pagó menos la cuota) y las transferencias necesarias para quedar a mano, emparejando al que más debe con al que más le deben. Los montos usan `BigDecimal` a 2 decimales y el centavo que sobra por redondeo se ajusta para que la suma de saldos dé 0.
+- Se implementó la actividad más votada por día (`ActividadGanadoraService`) y se integró al detalle del viaje (`GET /api/viajes/{id}`) como el campo `actividadMasVotada` de cada día. Desempate: más votos, menor costo estimado y creada primero; si no hay votos o hay empate total, el campo es `null`.
 - *(Espacio para que los demás integrantes agreguen sus actividades)*
 >>>>>>> a7dca92827789c4f9dd5ee0b66963f019b1ab46b
 
@@ -42,6 +44,8 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 | Comprobante opcional en gastos y su consulta (`POST /api/gastos` multipart, `GET /api/gastos/{id}/comprobante`) | Citlaly Morales Viveros | [https://github.com/Peps06/desarrollo-web/commit/ec2137d](https://github.com/Peps06/desarrollo-web/commit/ec2137d4f0164c50794aa52e31bb472dc8d4e8d3) |
 =======
 | Edición y eliminación de actividades (`PUT` y `DELETE /api/actividades/{id}`) y filtros de búsqueda de actividades y viajes | Diego Jiménez | [https://github.com/Peps06/desarrollo-web/commit/d58e19e](https://github.com/Peps06/desarrollo-web/commit/d58e19e) |
+| Balance de deudas del grupo (`GET /api/viajes/{id}/balance`) | Alfonso Mendoza Vásquez | [https://github.com/Peps06/desarrollo-web/commit/7b106317903d6e29a20e93d35448e7520f315114](https://github.com/Peps06/desarrollo-web/commit/7b106317903d6e29a20e93d35448e7520f315114) |
+| Actividad más votada por día en el detalle del viaje | Alfonso Mendoza Vásquez | [https://github.com/Peps06/desarrollo-web/commit/69055cd68932db10811078432731a43611e07ec7](https://github.com/Peps06/desarrollo-web/commit/69055cd68932db10811078432731a43611e07ec7) |
 | *(Espacio para actividades de los demás integrantes)* | | |
 >>>>>>> a7dca92827789c4f9dd5ee0b66963f019b1ab46b
 
@@ -54,6 +58,10 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - **Invalidación de sesiones al comprobar persistencia tras reiniciar el servidor:** Al detener y reiniciar Spring Boot para verificar la persistencia en MySQL, las peticiones `cURL` devolvían `401` porque Spring Security almacena los `JSESSIONID` en memoria. Se solucionó renovando la cookie mediante `POST /api/auth/login` antes de consultar `GET /api/viajes`.
 - **Error de conexión a MySQL al arrancar:** La aplicación no arrancaba con `Access denied for user 'bitacora_app'`. Había dos servidores MySQL en el equipo: el servicio `MySQL80` de Windows y el de WSL, ambos en el puerto 3306, y la aplicación en Windows se conectaba al que no tenía el usuario. Se resolvió corriendo la aplicación desde WSL.
 - **Puerto 8080 ocupado:** Las peticiones respondían 404 con una página de Jetty porque otro programa usaba el puerto 8080. La aplicación se arrancó en el puerto 8081 para las pruebas.
+- **Centavo sobrante en el balance:** Al dividir el total entre los participantes, la cuota se redondea (100 / 3 = 33.33) y la suma de los saldos daba 0.01 en lugar de 0. Se resolvió restando la diferencia al saldo más alto, comprobado con JUnit y con un caso real de 3 personas (5,125 / 3).
+- **Integrar la actividad ganadora sin consultas extra:** El desempate necesita `fechaCreacion`, que el DTO de actividad no trae. Se guardó en una variable la lista de actividades que el detalle ya consultaba, y se reutilizaron los conteos de `contarPorViaje`, con lo que no se agregó ninguna consulta.
+- **Empate total por la precisión de `DATETIME`:** Dos actividades creadas en el mismo segundo quedaron con la misma `fecha_creacion`, porque la columna no guarda fracciones de segundo. Es el comportamiento esperado (empate total, sin ganadora), y para probar el desempate por fecha se ajustó la fecha con SQL.
+- **Servidor sin conexión desde Windows:** El MySQL de Windows rechazó al usuario `bitacora_app`; las pruebas se hicieron con el MySQL de WSL.
 - *(Espacio para los problemas de los demás integrantes)*
 
 ---
@@ -71,6 +79,12 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - Consulta, incorporación por correo y eliminación de participantes de un viaje con validación de rol `ORGANIZADOR`, bloqueo de auto-eliminación y revocación inmediata de acceso en votación y gastos.
 - Edición de datos generales de un viaje (`PUT /api/viajes/{id}`) con validación de conflictos cuando se acortan fechas y existen actividades fuera del nuevo rango.
 - Cancelación lógica de viajes (`DELETE /api/viajes/{id}`) cambiando su estado a `CANCELADO` para ocultarlos del listado activo de todos los participantes sin perder integridad referencial en MySQL.
+
+**Operativas / completadas (módulos de Alfonso):**
+
+- Balance de deudas del grupo (`GET /api/viajes/{id}/balance`) con cuota por persona, saldos y transferencias sugeridas; sin gastos responde saldos en 0 y sin transferencias, y con un solo participante no hay transferencias. Responde 403 si el usuario no participa y 404 si el viaje no existe.
+- Actividad más votada de cada día en el detalle del viaje, con desempate por costo y fecha de creación y `null` cuando no hay votos o hay empate total.
+- 9 pruebas JUnit (4 del balance y 5 de la actividad ganadora) que no usan la base de datos.
 
 **Operativas / completadas (módulos de Diego):**
 
@@ -123,6 +137,16 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 - **Modificaciones realizadas por el equipo:** No se modificó el código generado antes del commit. Se reutilizaron `ActividadRequest`, `ActividadResponse`, `buscarParticipacion` y `ErrorNegocioException`, y los cambios en `ViajeController`, `ViajeService` y `ParticipanteViajeRepository` se limitaron a agregar los filtros opcionales.
 - **Forma en que se verificó el resultado:** Compilación y pruebas manuales hechas por mí con PowerShell y sesión por cookie: filtros solos y combinados, editar una actividad propia (200) y ajena (403), eliminar una actividad con votos (204) y comprobación en MySQL de que sus votos desaparecen, y los casos 404 y 400. El detalle completo se encuentra en `documentacion/reportes/ia-desarrollo/diego/r-ia-dev-s02.md` y en `documentacion/reportes/ia-documental/diego/r-ia-doc-s02.md`.
 
+- **Alfonso**
+
+- **Herramienta utilizada:** Claude Code (Anthropic), extensión de Visual Studio Code, modelo Claude Opus 5.5
+- **Actividad para la que se utilizó:** Implementación del balance de deudas (HU-21) y de la actividad más votada por día (HU-22), con sus pruebas JUnit y pruebas con cURL.
+- **Código o contenido generado:** DTOs (`BalanceResponse`, `SaldoResponse`, `TransferenciaResponse`, `ActividadMasVotadaResponse`), servicios (`BalanceService`, `ActividadGanadoraService`), `BalanceController`, la consulta `sumarMontoPorUsuario` en `GastoRepository`, el campo `actividadMasVotada` en `DiaResponse` y las pruebas `BalanceServiceTest` y `ActividadGanadoraServiceTest`.
+- **Modificaciones realizadas por el equipo:** La integración en `ViajeDetalleService` (código de Diego) se limitó a lo indispensable: inyectar el servicio, guardar en una variable la lista de actividades ya consultada y pasar la ganadora al armar cada día. Se documentaron las líneas exactas que cambiaron.
+- **Forma en que se verificó el resultado:** Pruebas JUnit (9 pruebas, todas correctas) y pruebas con cURL en WSL (`200`, `201`, `204`, `401`, `403`, `404`), con cálculo manual comparado contra MySQL y limpieza de los datos de prueba. El detalle está en `documentacion/reportes/ia-desarrollo/alfonso/` (`r-ia-dev-s03.md`, `r-ia-dev-s04.md`).
+
+---
+
 - *(Espacio para el uso de IA de los demás integrantes)*
 
 ---
@@ -137,7 +161,7 @@ Durante esta fase avanzamos en el desarrollo de **Backend completo (Entregable 3
 =======
 - **Diego Rafael Jiménez Trujano:** Implementación de **Editar y eliminar actividades** (endpoints `PUT` y `DELETE /api/actividades/{id}`, permiso solo para el autor o el organizador, borrado de los votos de la actividad en la misma transacción) e implementación de **Filtros de búsqueda** (`GET /api/viajes/{id}/actividades` por día y costo máximo, y `destino` y `rol` en `GET /api/viajes`), pruebas con PowerShell y verificación en MySQL.
 >>>>>>> a7dca92827789c4f9dd5ee0b66963f019b1ab46b
-- **Alfonso Mendoza Vásquez:** *(Completar)*
+- **Alfonso Mendoza Vásquez:** Implementó el balance de deudas del grupo (`GET /api/viajes/{id}/balance`) con el algoritmo de transferencias y el ajuste de redondeo, y la actividad más votada por día integrada al detalle del viaje. Escribió 9 pruebas JUnit y verificó los endpoints con cURL en WSL y con consultas en MySQL.
 - **Citlaly Morales Viveros:** Agregó el comprobante opcional al registrar un gasto (`POST /api/gastos` con `multipart/form-data`) y su consulta (`GET /api/gastos/{id}/comprobante`), visible solo para los participantes del viaje.
 
 ---

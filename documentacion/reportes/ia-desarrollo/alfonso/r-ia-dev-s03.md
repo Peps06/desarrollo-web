@@ -20,7 +20,7 @@ Implementación de `GET /api/viajes/{id}/balance`, que devuelve la cuota por per
 | **Prompt original** | [Ver prompt original](#prompt-original) |
 | **Respuesta de IA** | [Ver resumen de respuesta](#respuesta-de-ia) |
 | **Código anterior** | Commit `ce36470f5218fd302072d756b27a77750836bdef` (Merge branch 'main' of https://github.com/Peps06/desarrollo-web) |
-| **Código posterior** | Commit `4e36d81a5e8eb72dabbbe17ff3304f49e71bfe75` (HU-21: balance de deudas del grupo con transferencias y pruebas JUnit) |
+| **Código posterior** | Commit `7b106317903d6e29a20e93d35448e7520f315114` (HU-21: balance de deudas del grupo con transferencias y pruebas JUnit) |
 | **Diferencias entre versiones** | [Ver diferencias](#diferencias-entre-versiones) |
 | **Prueba de funcionamiento** | [Ver salida de pruebas](#pruebas) |
 | **Código de uso** | Generación |
