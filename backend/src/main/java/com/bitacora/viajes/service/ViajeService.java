@@ -17,6 +17,7 @@ import com.bitacora.viajes.repository.ViajeRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,13 +79,18 @@ public class ViajeService {
         return ViajeResponse.desde(viajeGuardado, RolParticipante.ORGANIZADOR);
     }
 
+    // Lista los viajes activos del usuario. "destino" (coincidencia parcial sin distinguir
+    // mayúsculas) y "rol" (organizador o participante) son opcionales y combinables.
     @Transactional(readOnly = true)
-    public List<ViajeResponse> listarMisViajes(String correoUsuario) {
+    public List<ViajeResponse> listarMisViajes(String correoUsuario, String destino, String rol) {
+        RolParticipante rolFiltro = leerRol(rol);
+        String patron = armarPatronDestino(destino);
+
         Usuario usuario = usuarioRepository.findByCorreo(correoUsuario)
                 .orElseThrow(() -> new ValidacionViajeException("sesion", "Usuario autenticado no encontrado"));
 
         List<ParticipanteViaje> participaciones = participanteViajeRepository
-                .buscarPorUsuarioYEstadoViaje(usuario.getId(), EstadoViaje.ACTIVO);
+                .buscarFiltrados(usuario.getId(), EstadoViaje.ACTIVO, patron, rolFiltro);
 
         List<ViajeResponse> listaViajes = new ArrayList<>();
         for (ParticipanteViaje p : participaciones) {
@@ -92,6 +98,28 @@ public class ViajeService {
         }
 
         return listaViajes;
+    }
+
+    // Convierte el filtro de rol. Vacío significa sin filtro; un valor desconocido responde 400.
+    private RolParticipante leerRol(String rol) {
+        if (rol == null || rol.isBlank()) {
+            return null;
+        }
+        try {
+            return RolParticipante.valueOf(rol.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw new DatosInvalidosException("El rol debe ser organizador o participante");
+        }
+    }
+
+    // Arma el patrón LIKE en minúsculas escapando los comodines que escriba el usuario.
+    private String armarPatronDestino(String destino) {
+        if (destino == null || destino.isBlank()) {
+            return null;
+        }
+        String limpio = destino.trim().toLowerCase(Locale.ROOT)
+                .replace("!", "!!").replace("%", "!%").replace("_", "!_");
+        return "%" + limpio + "%";
     }
 
     // Edita los datos de un viaje activo (solo ORGANIZADOR)
@@ -185,4 +213,4 @@ public class ViajeService {
             return campo;
         }
     }
-}
+}

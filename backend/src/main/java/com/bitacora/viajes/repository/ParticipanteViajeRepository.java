@@ -2,6 +2,7 @@ package com.bitacora.viajes.repository;
 
 import com.bitacora.viajes.model.EstadoViaje;
 import com.bitacora.viajes.model.ParticipanteViaje;
+import com.bitacora.viajes.model.RolParticipante;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +17,19 @@ public interface ParticipanteViajeRepository extends JpaRepository<ParticipanteV
     List<ParticipanteViaje> buscarPorUsuarioYEstadoViaje(
             @Param("usuarioId") Integer usuarioId,
             @Param("estado") EstadoViaje estado);
+
+    // Viajes del usuario filtrados por destino (patrón LIKE en minúsculas, escape '!') y/o rol.
+    // Un filtro nulo no se aplica.
+    @Query("SELECT p FROM ParticipanteViaje p JOIN FETCH p.viaje v "
+            + "WHERE p.usuario.id = :usuarioId AND v.estado = :estado "
+            + "AND (:patron IS NULL OR LOWER(v.destino) LIKE :patron ESCAPE '!') "
+            + "AND (:rol IS NULL OR p.rol = :rol) "
+            + "ORDER BY v.fechaInicio ASC")
+    List<ParticipanteViaje> buscarFiltrados(
+            @Param("usuarioId") Integer usuarioId,
+            @Param("estado") EstadoViaje estado,
+            @Param("patron") String patron,
+            @Param("rol") RolParticipante rol);
 
     @Query("SELECT p FROM ParticipanteViaje p JOIN FETCH p.viaje JOIN FETCH p.usuario "
             + "WHERE p.viaje.id = :viajeId AND p.usuario.correo = :correo")
@@ -37,4 +51,4 @@ public interface ParticipanteViajeRepository extends JpaRepository<ParticipanteV
 // Este archivo es la interfaz que se conecta con la tabla participante_viaje en MySQL.
 // Como un viaje tiene participantes con distintos roles, necesitamos una consulta que
 // traiga todas las filas donde aparece el usuario que inició sesión, pero ignorando
-// los viajes cancelados.
+// los viajes cancelados.

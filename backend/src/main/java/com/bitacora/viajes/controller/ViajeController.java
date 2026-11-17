@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -57,9 +58,12 @@ public class ViajeController {
         }
     }
 
-    // Listar los viajes activos donde participa el usuario en sesión
+    // Listar los viajes activos donde participa el usuario en sesión.
+    // Filtros opcionales y combinables: destino (parcial, sin distinguir mayúsculas) y rol.
     @GetMapping
-    public ResponseEntity<?> listarMisViajes(Authentication autenticacion) {
+    public ResponseEntity<?> listarMisViajes(@RequestParam(required = false) String destino,
+            @RequestParam(required = false) String rol,
+            Authentication autenticacion) {
         if (autenticacion == null || !autenticacion.isAuthenticated()
                 || autenticacion instanceof AnonymousAuthenticationToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -67,7 +71,7 @@ public class ViajeController {
         }
 
         String correoUsuario = autenticacion.getName();
-        List<ViajeResponse> viajes = viajeService.listarMisViajes(correoUsuario);
+        List<ViajeResponse> viajes = viajeService.listarMisViajes(correoUsuario, destino, rol);
         return ResponseEntity.ok(viajes);
     }
 
@@ -106,4 +110,4 @@ public class ViajeController {
         viajeService.cancelarViaje(viajeId, autenticacion.getName());
         return ResponseEntity.noContent().build();
     }
-}
+}
