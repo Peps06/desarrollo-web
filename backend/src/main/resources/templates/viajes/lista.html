@@ -1,1 +1,53 @@
-<!-- HU-28 | Responsable: Stephy | Página con la lista de viajes del usuario. -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Mis viajes')}"></head>
+<body>
+    <header th:replace="~{fragments/base :: navbar}"></header>
+
+    <div id="contenedorMensajes" class="contenedor-mensajes" aria-live="polite"></div>
+
+    <main class="pagina">
+        <div class="contenedor">
+            <div class="pagina__encabezado">
+                <h1>Mis viajes</h1>
+                <a th:href="@{/viajes/nuevo}" class="btn btn-primario">+ Crear viaje</a>
+            </div>
+
+            <section class="tarjeta" aria-label="Filtros de viajes" style="margin-bottom: var(--espacio-5);">
+                <div class="formulario__fila">
+                    <div class="campo">
+                        <label for="filtroDestino" class="campo__etiqueta">Buscar por destino</label>
+                        <input
+                            type="search"
+                            id="filtroDestino"
+                            placeholder="Ej. Oaxaca, CDMX, Cancún..."
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="filtroRol" class="campo__etiqueta">Filtrar por rol</label>
+                        <select id="filtroRol">
+                            <option value="">Todos los roles</option>
+                            <option value="organizador">Organizador</option>
+                            <option value="participante">Participante</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <p id="estadoCarga" class="texto-suave">Cargando tus viajes...</p>
+
+            <section id="rejillaViajes" class="rejilla oculto" aria-label="Lista de viajes"></section>
+
+            <section id="estadoVacio" class="vacio oculto" aria-live="polite">
+                <h2 id="tituloEstadoVacio">Aún no tienes viajes</h2>
+                <p id="textoEstadoVacio">¡Comienza a planear tu próxima aventura con tu grupo!</p>
+                <a th:href="@{/viajes/nuevo}" id="btnCrearVacio" class="btn btn-primario">Crear primer viaje</a>
+            </section>
+        </div>
+    </main>
+
+    <script th:src="@{/js/viajes-lista.js}"></script>
+</body>
+</html>

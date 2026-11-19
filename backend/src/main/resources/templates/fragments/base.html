@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${titulo} + ' | Bitácora de Viajes'">Bitácora de Viajes</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Source+Sans+3:wght@400;600&display=swap">
     <link rel="stylesheet" th:href="@{/css/variables.css}">
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/componentes.css}">
+    <link rel="stylesheet" th:href="@{/css/presupuesto.css}">
     <link rel="stylesheet" th:href="@{/css/responsive.css}">
 </head>
 <body>
-    <header th:fragment="navbar" class="barra-superior">
-        <div class="contenedor">
-            <a th:href="@{/viajes}" class="marca">Bitácora de Viajes</a>
-            <nav class="navegacion">
-                <a th:href="@{/viajes}" class="btn btn-texto">Mis viajes</a>
-                <a th:href="@{/viajes/nuevo}" class="btn btn-texto">Nuevo viaje</a>
-            </nav>
+    <header th:fragment="navbar" class="barra-nav">
+        <div class="contenedor barra-nav__contenido">
+            <a th:href="@{/viajes}" class="barra-nav__marca">Bitácora de viajes</a>
+            <ul class="barra-nav__enlaces">
+                <li><a th:href="@{/viajes}">Mis viajes</a></li>
+                <li><a th:href="@{/viajes/nuevo}">Nuevo viaje</a></li>
+            </ul>
         </div>
     </header>
 </body>

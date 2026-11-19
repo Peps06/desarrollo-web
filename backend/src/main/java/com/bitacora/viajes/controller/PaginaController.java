@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
-public class PaginaController{
+public class PaginaController {
 
     @GetMapping("/")
     public String inicio() {
@@ -19,8 +19,13 @@ public class PaginaController{
     }
 
     @GetMapping("/registro")
-    public String registro(){
+    public String registro() {
         return "registro";
+    }
+
+    @GetMapping("/viajes")
+    public String listarViajes() {
+        return "viajes/lista";
     }
 
     @GetMapping("/viajes/nuevo")
@@ -29,8 +34,8 @@ public class PaginaController{
     }
 
     @GetMapping("/viajes/{id}")
-    public String detalleViaje(@PathVariable("id")Integer id, Model model){
-        model.addAttribute("viajeId",id);
+    public String detalleViaje(@PathVariable("id") Integer id, Model model) {
+        model.addAttribute("viajeId", id);
         return "viajes/detalle";
     }
 }
