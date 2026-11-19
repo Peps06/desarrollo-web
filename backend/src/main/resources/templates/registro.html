@@ -1,1 +1,40 @@
-<!-- HU-26 | Responsable: Dana | Página de registro de usuario. -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Crear cuenta')}"></head>
+<body>
+    <div id="contenedorMensajes" class="contenedor-mensajes" aria-live="polite"></div>
+
+    <main class="acceso">
+        <section class="tarjeta">
+            <h1>Crear cuenta</h1>
+
+            <form id="formRegistro" class="formulario" novalidate>
+                <div class="campo" id="grupo-nombre">
+                    <label for="nombre" class="campo__etiqueta">Nombre</label>
+                    <input type="text" id="nombre" autocomplete="name">
+                    <span class="campo__error" id="error-nombre"></span>
+                </div>
+
+                <div class="campo" id="grupo-correo">
+                    <label for="correo" class="campo__etiqueta">Correo</label>
+                    <input type="email" id="correo" autocomplete="email">
+                    <span class="campo__error" id="error-correo"></span>
+                </div>
+
+                <div class="campo" id="grupo-contrasena">
+                    <label for="contrasena" class="campo__etiqueta">Contraseña (mínimo 8 caracteres)</label>
+                    <input type="password" id="contrasena" autocomplete="new-password">
+                    <span class="campo__error" id="error-contrasena"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primario">Crear cuenta</button>
+            </form>
+
+            <p class="texto-suave">¿Ya tienes cuenta? <a th:href="@{/login}">Iniciar sesión</a></p>
+        </section>
+    </main>
+
+    <script th:src="@{/js/validacion.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
+</body>
+</html>

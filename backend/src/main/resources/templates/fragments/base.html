@@ -18,8 +18,10 @@
             <ul class="barra-nav__enlaces">
                 <li><a th:href="@{/viajes}">Mis viajes</a></li>
                 <li><a th:href="@{/viajes/nuevo}">Nuevo viaje</a></li>
+                <li><button type="button" class="btn-texto" onclick="cerrarSesion()">Cerrar sesión</button></li>
             </ul>
         </div>
+        <script th:src="@{/js/auth.js}"></script>
     </header>
 </body>
 </html>
