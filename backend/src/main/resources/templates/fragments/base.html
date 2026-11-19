@@ -1,1 +1,23 @@
-<!-- HU-36 | Responsable: Stephy | Plantilla base con encabezado, navegación y pie compartidos. -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' | Bitácora de Viajes'">Bitácora de Viajes</title>
+    <link rel="stylesheet" th:href="@{/css/variables.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/componentes.css}">
+    <link rel="stylesheet" th:href="@{/css/responsive.css}">
+</head>
+<body>
+    <header th:fragment="navbar" class="barra-superior">
+        <div class="contenedor">
+            <a th:href="@{/viajes}" class="marca">Bitácora de Viajes</a>
+            <nav class="navegacion">
+                <a th:href="@{/viajes}" class="btn btn-texto">Mis viajes</a>
+                <a th:href="@{/viajes/nuevo}" class="btn btn-texto">Nuevo viaje</a>
+            </nav>
+        </div>
+    </header>
+</body>
+</html>
