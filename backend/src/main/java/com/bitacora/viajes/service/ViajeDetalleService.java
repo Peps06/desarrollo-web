@@ -96,7 +96,11 @@ public class ViajeDetalleService {
                 .buscarParticipacion(viajeId, correoUsuario).orElse(null);
 
         if (participacion == null) {
-            if (!viajeRepository.existsById(viajeId)) {
+            // Un viaje cancelado cuenta como inexistente también para quien no participa (404 antes que 403).
+            boolean viajeVisible = viajeRepository.findById(viajeId)
+                    .map(viaje -> viaje.getEstado() != EstadoViaje.CANCELADO)
+                    .orElse(false);
+            if (!viajeVisible) {
                 throw new ErrorNegocioException(HttpStatus.NOT_FOUND, "viaje", "El viaje no existe");
             }
             throw new ErrorNegocioException(HttpStatus.FORBIDDEN, "viaje", "No participas en este viaje");

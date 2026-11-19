@@ -1,1 +1,107 @@
-<!-- HU-29 | Responsable: Diego | Página con el detalle del viaje, itinerario y actividades. -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Detalle del viaje')}"></head>
+<body>
+    <header th:replace="~{fragments/base :: navbar}"></header>
+
+    <div id="contenedorMensajes" class="contenedor-mensajes" aria-live="polite"></div>
+
+    <!-- El id del viaje llega desde PaginaController y lo lee viaje-detalle.js -->
+    <main id="paginaDetalle" class="pagina" th:data-viaje-id="${viajeId}">
+        <div class="contenedor">
+            <p id="estadoCarga" class="texto-suave" role="status">Cargando el viaje...</p>
+
+            <section id="estadoError" class="vacio oculto" aria-live="polite">
+                <h2 id="tituloEstadoError">No se pudo cargar el viaje</h2>
+                <p id="textoEstadoError">Intenta de nuevo más tarde.</p>
+                <a th:href="@{/viajes}" class="btn btn-primario">Volver a mis viajes</a>
+            </section>
+
+            <div id="contenidoViaje" class="pila oculto">
+                <!-- Encabezado: destino, fechas, participantes y resumen de presupuesto -->
+                <section class="tarjeta" aria-labelledby="tituloDestino">
+                    <div class="pagina__encabezado">
+                        <div>
+                            <h1 id="tituloDestino">Destino</h1>
+                            <p id="textoFechas" class="tarjeta__meta"></p>
+                        </div>
+                        <div class="fila">
+                            <button type="button" id="btnProponer" class="btn btn-primario">+ Proponer actividad</button>
+                            <div id="zona-exportar">
+                                <button type="button" id="btnExportarPdf" class="btn btn-secundario">Exportar PDF</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="campo__etiqueta">Grupo · <span id="textoParticipantes"></span></p>
+                    <div id="listaGrupo" class="fila" role="list" aria-label="Participantes del viaje"></div>
+
+                    <dl class="resumen-presupuesto" aria-label="Resumen del presupuesto">
+                        <div class="resumen-presupuesto__dato">
+                            <dt>Presupuesto total</dt>
+                            <dd id="datoPresupuesto">—</dd>
+                        </div>
+                        <div class="resumen-presupuesto__dato">
+                            <dt>Gastado</dt>
+                            <dd id="datoGastado">—</dd>
+                        </div>
+                        <div class="resumen-presupuesto__dato">
+                            <dt id="etiquetaRestante">Disponible</dt>
+                            <dd id="datoRestante">—</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <div class="detalle-viaje pila">
+                    <div class="pila">
+                        <section class="tarjeta" aria-label="Filtros del itinerario">
+                            <div class="formulario__fila">
+                                <div class="campo">
+                                    <label for="filtroDia" class="campo__etiqueta">Filtrar por día</label>
+                                    <select id="filtroDia">
+                                        <option value="">Todos los días</option>
+                                    </select>
+                                </div>
+
+                                <div class="campo" id="grupo-filtroCostoMax">
+                                    <label for="filtroCostoMax" class="campo__etiqueta">Costo máximo</label>
+                                    <input
+                                        type="number"
+                                        id="filtroCostoMax"
+                                        min="0"
+                                        step="0.01"
+                                        inputmode="decimal"
+                                        placeholder="Ej. 500"
+                                    >
+                                    <span class="campo__error" id="error-filtroCostoMax"></span>
+                                </div>
+                            </div>
+                            <div class="fila fila--separada">
+                                <span id="textoFiltros" class="texto-suave" aria-live="polite"></span>
+                                <button type="button" id="btnLimpiarFiltros" class="btn btn-texto oculto">Limpiar filtros</button>
+                            </div>
+                        </section>
+
+                        <section class="pila" aria-labelledby="tituloItinerario">
+                            <h2 id="tituloItinerario">Itinerario</h2>
+                            <div id="listaDias" class="pila"></div>
+                        </section>
+
+                        <!-- Contenedores para las secciones del resto del equipo -->
+                        <section id="zona-votos" aria-label="Votación de actividades"></section>
+                        <section id="zona-gastos" aria-label="Gastos del viaje"></section>
+                    </div>
+
+                    <aside class="panel-lateral pila" aria-label="Resumen del grupo">
+                        <section id="zona-presupuesto" aria-label="Presupuesto"></section>
+                        <section id="zona-balance" aria-label="Balance del grupo"></section>
+                        <section id="zona-checklist" aria-label="Checklist del viaje"></section>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:src="@{/js/viaje-detalle.js}"></script>
+</body>
+</html>
