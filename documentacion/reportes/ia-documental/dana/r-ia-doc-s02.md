@@ -1,7 +1,7 @@
 # Reporte de Uso Documental en el Proyecto
 
 **Fecha:** 14-11-2026
-**Número de reporte:** 02 (Dana Carmona Santamaria - Manejo uniforme de errores HTTP)
+**Número de reporte:** 02 (Dana Carmona Santamaria)
 
 ---
 
