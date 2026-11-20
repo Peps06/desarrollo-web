@@ -5,26 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const textoEstadoVacio = document.getElementById("textoEstadoVacio");
     const btnCrearVacio = document.getElementById("btnCrearVacio");
     const estadoCarga = document.getElementById("estadoCarga");
-    const contenedorMensajes = document.getElementById("contenedorMensajes");
 
     const inputDestino = document.getElementById("filtroDestino");
     const selectRol = document.getElementById("filtroRol");
 
     let temporizadorBusqueda = null;
-
-    function mostrarMensajeError(texto) {
-        if (!contenedorMensajes) return;
-        contenedorMensajes.innerHTML = "";
-        const alerta = document.createElement("div");
-        alerta.className = "mensaje mensaje-error";
-        alerta.setAttribute("role", "alert");
-        alerta.textContent = texto;
-        contenedorMensajes.appendChild(alerta);
-
-        setTimeout(() => {
-            alerta.remove();
-        }, 4000);
-    }
 
     function formatearFecha(isoFecha) {
         if (!isoFecha) return "";
@@ -131,14 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Accept": "application/json" }
             });
 
-            if (respuesta.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-
             if (!respuesta.ok) {
-                const errorData = await respuesta.json().catch(() => null);
-                mostrarMensajeError(errorData?.mensaje || "No se pudieron cargar tus viajes.");
+                await manejarErrorApi(respuesta);
                 estadoCarga.classList.add("oculto");
                 return;
             }
@@ -147,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderizarViajes(viajes, hayFiltrosActivos);
         } catch (error) {
             estadoCarga.classList.add("oculto");
-            mostrarMensajeError("Error de conexión al consultar tus viajes.");
+            mostrarErrorRed();
         }
     }
 

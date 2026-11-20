@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const formulario = document.getElementById("formNuevoViaje");
     const btnGuardar = document.getElementById("btnGuardarViaje");
-    const contenedorMensajes = document.getElementById("contenedorMensajes");
 
     const inputDestino = document.getElementById("destino");
     const inputFechaInicio = document.getElementById("fechaInicio");
@@ -12,43 +11,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const campos = ["destino", "fechaInicio", "fechaFin", "presupuestoTotal", "monedaBase"];
 
     function limpiarErrores() {
-        if (contenedorMensajes) {
-            contenedorMensajes.innerHTML = "";
-        }
-
         campos.forEach((campo) => {
             const spanError = document.getElementById(`error-${campo}`);
             const grupo = document.getElementById(`grupo-${campo}`);
-            if (spanError) {
-                spanError.textContent = "";
-            }
-            if (grupo) {
-                grupo.classList.remove("campo--invalido");
-            }
+            if (spanError) spanError.textContent = "";
+            if (grupo) grupo.classList.remove("campo--invalido");
         });
     }
 
     function mostrarErrorCampo(campo, mensaje) {
         const spanError = document.getElementById(`error-${campo}`);
         const grupo = document.getElementById(`grupo-${campo}`);
-        if (spanError) {
-            spanError.textContent = mensaje;
-        }
-        if (grupo) {
-            grupo.classList.add("campo--invalido");
-        }
-        if (!spanError) {
-            mostrarMensajeGeneral(mensaje);
-        }
-    }
-
-    function mostrarMensajeGeneral(mensaje) {
-        if (!contenedorMensajes) return;
-        const alerta = document.createElement("div");
-        alerta.className = "mensaje mensaje-error";
-        alerta.setAttribute("role", "alert");
-        alerta.textContent = mensaje;
-        contenedorMensajes.appendChild(alerta);
+        if (spanError) spanError.textContent = mensaje;
+        if (grupo) grupo.classList.add("campo--invalido");
     }
 
     function validarFormulario() {
@@ -94,6 +69,10 @@ document.addEventListener("DOMContentLoaded", () => {
             esValido = false;
         }
 
+        if (!esValido) {
+            mostrarMensaje("error", "Revisa los datos");
+        }
+
         return esValido;
     }
 
@@ -137,40 +116,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(payload)
             });
 
-            if (respuesta.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-
             if (respuesta.status === 201) {
                 const viajeCreado = await respuesta.json();
-                window.location.href = `/viajes/${viajeCreado.id}`;
+                mostrarMensaje("exito", "Viaje creado correctamente");
+                setTimeout(() => {
+                    window.location.href = `/viajes/${viajeCreado.id}`;
+                }, 700);
                 return;
             }
 
-            if (respuesta.status === 400) {
-                const errorData = await respuesta.json().catch(() => null);
-                if (errorData) {
-                    if (Array.isArray(errorData.errores) && errorData.errores.length > 0) {
-                        errorData.errores.forEach((err) => {
-                            mostrarErrorCampo(err.campo, err.mensaje);
-                        });
-                    } else if (errorData.campo && errorData.mensaje) {
-                        mostrarErrorCampo(errorData.campo, errorData.mensaje);
-                    } else if (errorData.mensaje) {
-                        mostrarMensajeGeneral(errorData.mensaje);
-                    } else {
-                        mostrarMensajeGeneral("Revisa los datos capturados e inténtalo de nuevo.");
-                    }
-                } else {
-                    mostrarMensajeGeneral("Datos inválidos. Verifica los campos del formulario.");
-                }
-                return;
+            const errorData = await manejarErrorApi(respuesta);
+            if (respuesta.status === 400 && errorData && Array.isArray(errorData.errores)) {
+                errorData.errores.forEach((err) => {
+                    mostrarErrorCampo(err.campo, err.mensaje);
+                });
             }
-
-            mostrarMensajeGeneral("Ocurrió un error inesperado al crear el viaje. Intenta más tarde.");
         } catch (error) {
-            mostrarMensajeGeneral("No se pudo conectar con el servidor. Verifica tu conexión.");
+            mostrarErrorRed();
         } finally {
             btnGuardar.disabled = false;
             btnGuardar.textContent = "Crear viaje";
