@@ -1,10 +1,11 @@
 // HU-15 | Responsable: Citlaly | DTO de salida con los datos de un gasto.
 package com.bitacora.viajes.dto;
 
-import com.bitacora.viajes.model.CategoriaGasto;
-import com.bitacora.viajes.model.Gasto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.bitacora.viajes.model.CategoriaGasto;
+import com.bitacora.viajes.model.Gasto;
 
 /**
  * Representación de un gasto que se regresa al cliente.
@@ -20,6 +21,11 @@ public class GastoResponse {
     private BigDecimal monto;
     private LocalDateTime fecha;
     private Integer usuarioId;
+    private String usuarioNombre;
+    private String monedaOriginal;
+    private BigDecimal montoOriginal;
+    private BigDecimal tipoCambio;
+    private String comprobanteUrl;
 
     public GastoResponse(Gasto gasto) {
         this.id = gasto.getId();
@@ -29,6 +35,14 @@ public class GastoResponse {
         this.monto = gasto.getMonto();
         this.fecha = gasto.getFecha();
         this.usuarioId = gasto.getUsuario().getId();
+        this.usuarioNombre = gasto.getUsuario().getNombre();
+        this.monedaOriginal = gasto.getMonedaOriginal();
+        this.montoOriginal = gasto.getMontoOriginal();
+        this.tipoCambio = gasto.getTipoCambio();
+        // Ruta para descargar el comprobante; null si el gasto no tiene uno
+        this.comprobanteUrl = gasto.getImagenUrl() != null
+                ? "/api/gastos/" + gasto.getId() + "/comprobante"
+                : null;
     }
 
     public Integer getId() {
@@ -57,5 +71,25 @@ public class GastoResponse {
 
     public Integer getUsuarioId() {
         return usuarioId;
+    }
+
+    public String getUsuarioNombre() {
+        return usuarioNombre;
+    }
+
+    public String getMonedaOriginal() {
+        return monedaOriginal;
+    }
+
+    public BigDecimal getMontoOriginal() {
+        return montoOriginal;
+    }
+
+    public BigDecimal getTipoCambio() {
+        return tipoCambio;
+    }
+
+    public String getComprobanteUrl() {
+        return comprobanteUrl;
     }
 }

@@ -21,6 +21,9 @@ public interface GastoRepository extends JpaRepository<Gasto, Integer> {
     @Query("select coalesce(sum(g.monto), 0) from Gasto g where g.viaje.id = :viajeId")
     BigDecimal sumarMontoPorViaje(@Param("viajeId") Integer viajeId);
 
+    // Gastos de un viaje, del más reciente al más antiguo
+    List<Gasto> findByViajeIdOrderByFechaDesc(Integer viajeId);
+
     // HU-21: cuánto pagó cada usuario en el viaje. La suma la hace MySQL (GROUP BY),
     // así no se cargan todos los gastos. Cada fila es [usuarioId (Integer), total (BigDecimal)].
     // Los usuarios que no han pagado nada no aparecen.

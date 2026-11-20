@@ -11,18 +11,18 @@ import java.math.BigDecimal;
 public class GastoRegistradoResponse {
 
     private GastoResponse gasto;
-    private BigDecimal totalViaje;
+    private BigDecimal totalGastado;
 
-    public GastoRegistradoResponse(GastoResponse gasto, BigDecimal totalViaje) {
+    public GastoRegistradoResponse(GastoResponse gasto, BigDecimal totalGastado) {
         this.gasto = gasto;
-        this.totalViaje = totalViaje;
+        this.totalGastado = totalGastado;
     }
 
     public GastoResponse getGasto() {
         return gasto;
     }
 
-    public BigDecimal getTotalViaje() {
-        return totalViaje;
+    public BigDecimal getTotalGastado() {
+        return totalGastado;
     }
 }

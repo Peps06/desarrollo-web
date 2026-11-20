@@ -16,6 +16,7 @@ import com.bitacora.viajes.repository.GastoRepository;
 import com.bitacora.viajes.repository.UsuarioRepository;
 import com.bitacora.viajes.repository.ViajeRepository;
 import java.math.BigDecimal;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -133,7 +134,8 @@ public class GastoService {
     }
 
     /**
-     * Regresa el comprobante de un gasto. Solo lo ven los participantes del viaje.
+     * Regresa el comprobante de un gasto. Solo lo ven los participantes del
+     * viaje.
      */
     @Transactional(readOnly = true)
     public Resource obtenerComprobante(Integer id, String email) {
@@ -147,6 +149,24 @@ public class GastoService {
             throw new RecursoNoEncontradoException("Este gasto no tiene comprobante");
         }
         return almacenamientoService.cargar(gasto.getImagenUrl());
+    }
+
+    /**
+     * Regresa los gastos de un viaje, del más reciente al más antiguo. Solo los
+     * ven los participantes del viaje.
+     */
+    @Transactional(readOnly = true)
+    public List<GastoResponse> listarPorViaje(Integer viajeId, String email) {
+        Viaje viaje = buscarViaje(viajeId);
+        Usuario usuario = buscarUsuario(email);
+
+        if (!gastoRepository.existeParticipacion(viaje.getId(), usuario.getId())) {
+            throw new AccesoDenegadoException("No participas en este viaje");
+        }
+        return gastoRepository.findByViajeIdOrderByFechaDesc(viajeId)
+                .stream()
+                .map(GastoResponse::new)
+                .toList();
     }
 
     private Gasto buscarGasto(Integer id) {

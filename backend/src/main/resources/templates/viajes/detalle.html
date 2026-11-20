@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{fragments/base :: head('Detalle del viaje')}"></head>
+
 <body>
     <header th:replace="~{fragments/base :: navbar}"></header>
 
@@ -26,9 +28,11 @@
                             <p id="textoFechas" class="tarjeta__meta"></p>
                         </div>
                         <div class="fila">
-                            <button type="button" id="btnProponer" class="btn btn-primario">+ Proponer actividad</button>
+                            <button type="button" id="btnProponer" class="btn btn-primario">+ Proponer
+                                actividad</button>
                             <div id="zona-exportar">
-                                <button type="button" id="btnExportarPdf" class="btn btn-secundario">Exportar PDF</button>
+                                <button type="button" id="btnExportarPdf" class="btn btn-secundario">Exportar
+                                    PDF</button>
                             </div>
                         </div>
                     </div>
@@ -65,20 +69,15 @@
 
                                 <div class="campo" id="grupo-filtroCostoMax">
                                     <label for="filtroCostoMax" class="campo__etiqueta">Costo máximo</label>
-                                    <input
-                                        type="number"
-                                        id="filtroCostoMax"
-                                        min="0"
-                                        step="0.01"
-                                        inputmode="decimal"
-                                        placeholder="Ej. 500"
-                                    >
+                                    <input type="number" id="filtroCostoMax" min="0" step="0.01" inputmode="decimal"
+                                        placeholder="Ej. 500">
                                     <span class="campo__error" id="error-filtroCostoMax"></span>
                                 </div>
                             </div>
                             <div class="fila fila--separada">
                                 <span id="textoFiltros" class="texto-suave" aria-live="polite"></span>
-                                <button type="button" id="btnLimpiarFiltros" class="btn btn-texto oculto">Limpiar filtros</button>
+                                <button type="button" id="btnLimpiarFiltros" class="btn btn-texto oculto">Limpiar
+                                    filtros</button>
                             </div>
                         </section>
 
@@ -104,5 +103,7 @@
 
     <script th:src="@{/js/viaje-detalle.js}"></script>
     <script th:src="@{/js/checklist.js}"></script>
+    <script th:src="@{/js/gastos.js}"></script>
 </body>
+
 </html>
