@@ -15,16 +15,16 @@ Implementación de `ActividadGanadoraService`, que elige la actividad más votad
 
 | Evidencia | Formato |
 | :--- | :--- |
-| **Herramienta** | Claude Code (Anthropic), extensión de Visual Studio Code |
-| **Modelo/temperatura** | Claude Opus 5.5 |
+| **Herramienta** | Claude(Anthropic) |
+| **Modelo/temperatura** | Claude Sonnet 5.5 |
 | **Prompt original** | [Ver prompt original](#prompt-original) |
 | **Respuesta de IA** | [Ver resumen de respuesta](#respuesta-de-ia) |
-| **Código anterior** | Commit `7b106317903d6e29a20e93d35448e7520f315114` (HU-21: balance de deudas del grupo con transferencias y pruebas JUnit) |
-| **Código posterior** | Commit `69055cd68932db10811078432731a43611e07ec7` (HU-22: actividad más votada por día en el detalle del viaje) |
+| **Código anterior** | Commit `7b106317903d6e29a20e93d35448e7520f315114` (HU-21: balance de deudas del grupo) |
+| **Código posterior** | Commit `69055cd68932db10811078432731a43611e07ec7` (HU-22: actividad más votada por día) |
 | **Diferencias entre versiones** | [Ver diferencias](#diferencias-entre-versiones) |
 | **Prueba de funcionamiento** | [Ver salida de pruebas](#pruebas) |
 | **Código de uso** | Generación |
-| **Reflexión del estudiante** | Aprendí a resolver un empate con varios criterios en orden: solo se pasa al siguiente criterio si el anterior empató. Recorrer las actividades llevando una "ganadora provisional" es más fácil de seguir que ordenar toda la lista. También aprendí a integrar mi parte al código de otro compañero tocando lo mínimo y reutilizando la consulta de votos que ya existía, en lugar de hacer una consulta por cada actividad. En las pruebas con cURL vi un caso real de empate total: dos actividades creadas en el mismo segundo quedaron con la misma `fechaCreacion`, porque la columna `DATETIME` guarda solo segundos. |
+| **Reflexión del estudiante** | Aprendí a resolver un empate con varios criterios en orden: solo se pasa al siguiente criterio si el anterior empató. Recorrer las actividades llevando una ganadora provisional es más fácil de seguir que ordenar toda la lista. También aprendí a integrar mi parte al código de otro compañero tocando lo mínimo y reutilizando la consulta de votos que ya existía, en lugar de hacer una consulta por cada actividad. En las pruebas con cURL vi un caso real de empate total: dos actividades creadas en el mismo segundo quedaron con la misma `fechaCreacion`, porque la columna `DATETIME` guarda solo segundos. |
 
 ---
 

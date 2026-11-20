@@ -15,13 +15,13 @@ Implementación de `GET /api/viajes/{id}/presupuesto`, que devuelve el presupues
 
 | Evidencia | Formato |
 | :--- | :--- |
-| **Herramienta** | Claude Code (Anthropic), extensión de Visual Studio Code |
-| **Modelo/temperatura** | Claude Opus 5.5 |
+| **Herramienta** | Claude (Anthropic) |
+| **Modelo/temperatura** | Sonnet 5.5 |
 | **Prompt original** | [Ver prompt original](#prompt-original) |
 | **Respuesta de IA** | [Ver resumen de respuesta](#respuesta-de-ia) |
 | **Código anterior** | Commit `7c0b87df5a550fd1cfc636e950d6909c94e423fa` (HU-14: expone POST y DELETE /api/actividades/{id}/votos) |
 | **Código posterior** | Commit `2ed0a8d728850ba900742beb7af8c6b7d9a9ed9f` (HU-16: agrega pruebas JUnit (sin gastos, dentro, excedido)) |
-| **Diferencias entre versiones** | [Ver diferencias](#diferencias-entre-versiones) |
+| **Diferencias entre versiones** | [Ver diferencias](#diferencias-entre-versiones) |   
 | **Prueba de funcionamiento** | [Ver salida de pruebas](#pruebas) |
 | **Código de uso** | Generación |
 | **Reflexión del estudiante** | Aprendí a usar `BigDecimal` en lugar de `double` para el dinero, porque `double` genera errores de redondeo. También a cuidar el caso sin gastos para no dividir entre cero, y a dejar el cálculo en el servicio para poder probarlo con JUnit sin levantar el servidor. Las 3 pruebas (sin gastos, dentro y excedido) me sirvieron para comprobar las fórmulas. |
@@ -29,12 +29,19 @@ Implementación de `GET /api/viajes/{id}/presupuesto`, que devuelve el presupues
 ---
 
 ### Prompt original
-> ya hice el push, pasemos a HU-16, Lo mismo, ya hazla completa, 3 commits a main, y luego me dices para hacer push.
+> Ya refine todo e hice el push, ahora necesito pasemos a HU-16, lo mismo, HU-16 Consultar presupuesto. Como participante de un viaje, quiero consultar el estado del presupuesto, para saber cuánto se ha gastado, cuánto falta y cuánto toca por persona
+>Alcance: construyo el servicio del cálculo; alimenta la barra de progreso de HU-32.
+
+>GET /api/viajes/{id}/presupuesto devuelve {presupuestoTotal, totalGastado, restante, porcentajeUsado, numParticipantes, gastoPorPersona, monedaBase}.
+>El cálculo vive en PresupuestoService, no en el controlador, con BigDecimal a 2 decimales.
+>Sin gastos: totalGastado 0 y porcentaje 0, nunca división entre cero.
+>>Solo participantes (403); viaje inexistente (404).
+>Pruebas JUnit con 3 casos: sin gastos, dentro del presupuesto, excedido.
 
 "Lo mismo" se refiere a las indicaciones dadas antes en la misma conversación para HU-14 (hacer la historia completa con código limpio, sencillo y entendible). Los criterios de aceptación de HU-16 se tomaron del documento de historias de usuario del equipo y del catálogo `documentacion/api.md`.
 
 ### Respuesta de IA
-Se generaron cuatro archivos en tres commits:
+Se generaron cuatro archivos:
 - `PresupuestoResponse`: record con los 7 campos del catálogo (`presupuestoTotal`, `totalGastado`, `restante`, `porcentajeUsado`, `numParticipantes`, `gastoPorPersona`, `monedaBase`).
 - `PresupuestoService`: el método `obtenerPresupuesto` trae los datos de la base de datos y reutiliza `buscarParticipacion` de `ViajeDetalleService` para responder 404 (viaje inexistente) y 403 (no participa); el método `calcular` hace las cuentas (restante = total − gastado, porcentaje = gastado × 100 / total, por persona = gastado / participantes) con `BigDecimal` y `RoundingMode.HALF_UP`.
 - `PresupuestoController`: expone `GET /api/viajes/{id}/presupuesto` y toma al usuario de la sesión; no hace cálculos.
@@ -61,7 +68,7 @@ Test set: com.bitacora.viajes.service.PresupuestoServiceTest
 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.404 s -- in com.bitacora.viajes.service.PresupuestoServiceTest
 ```
 
-**Pruebas con cURL** contra el servidor local, con los datos de prueba del `DataLoader` (viaje 1: presupuesto de 15,000 MXN, 2 participantes y 2 gastos):
+**Pruebas con cURL** contra el servidor local, con los datos de prueba del `DataLoader` (viaje 1: presupuesto de 15000 pesos, 2 participantes y 2 gastos):
 ```text
 $ curl -s -c /tmp/luis.txt -H "Content-Type: application/json" -d '{"correo":"luis@example.com","contrasena":"Password123"}' localhost:8080/api/auth/login
 

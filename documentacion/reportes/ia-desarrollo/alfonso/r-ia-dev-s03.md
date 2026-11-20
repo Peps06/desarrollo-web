@@ -15,12 +15,12 @@ Implementación de `GET /api/viajes/{id}/balance`, que devuelve la cuota por per
 
 | Evidencia | Formato |
 | :--- | :--- |
-| **Herramienta** | Claude Code (Anthropic), extensión de Visual Studio Code |
-| **Modelo/temperatura** | Claude Opus 5.5 |
+| **Herramienta** | Claude (Anthropic) |
+| **Modelo/temperatura** | Claude Sonnet 5.5 |
 | **Prompt original** | [Ver prompt original](#prompt-original) |
 | **Respuesta de IA** | [Ver resumen de respuesta](#respuesta-de-ia) |
 | **Código anterior** | Commit `ce36470f5218fd302072d756b27a77750836bdef` (Merge branch 'main' of https://github.com/Peps06/desarrollo-web) |
-| **Código posterior** | Commit `7b106317903d6e29a20e93d35448e7520f315114` (HU-21: balance de deudas del grupo con transferencias y pruebas JUnit) |
+| **Código posterior** | Commit `7b106317903d6e29a20e93d35448e7520f315114` (HU-21: balance de deudas del grupo) |
 | **Diferencias entre versiones** | [Ver diferencias](#diferencias-entre-versiones) |
 | **Prueba de funcionamiento** | [Ver salida de pruebas](#pruebas) |
 | **Código de uso** | Generación |
@@ -29,29 +29,26 @@ Implementación de `GET /api/viajes/{id}/balance`, que devuelve la cuota por per
 ---
 
 ### Prompt original
-> Bitácora de viajes (Spring Boot 3.2.5, Java 17, MySQL). Ahora vamos a HU-21: Balance de deudas del grupo. Los archivos ya existen pero están vacíos (solo tienen un comentario): BalanceService.java, BalanceController.java, BalanceServiceTest.java y los DTO BalanceResponse.java, SaldoResponse.java y TransferenciaResponse.java.
->
-> Requisitos:
-> - GET /api/viajes/{id}/balance devuelve {cuotaPorPersona, totalGastado, saldos:[{usuarioId, nombre, pagado, saldo}], transferencias:[{deudorId, deudorNombre, acreedorId, acreedorNombre, monto}]}.
-> - cuota = totalGastado / número de participantes. saldo de cada uno = lo que pagó - cuota (positivo: le deben; negativo: debe).
-> - Las transferencias se generan emparejando al que más debe con al que más le deben, hasta dejar todos los saldos en 0.
-> - BigDecimal con 2 decimales y RoundingMode.HALF_UP. La suma de los saldos debe dar 0; si sobra un centavo por redondeo, ajústalo para que cuadre.
-> - Sin gastos: saldos en 0 y transferencias vacías. Con un solo participante: sin transferencias.
-> - Solo participantes: 403. Viaje inexistente: 404. Reutiliza viajeDetalleService.buscarParticipacion(viajeId, correoUsuario), igual que en PresupuestoService.
-> - Usa participanteViajeRepository.buscarPorViaje(viajeId) para los participantes. Para lo que pagó cada uno, agrega a GastoRepository una consulta que sume monto agrupado por usuario.id en el viaje, sin cargar todos los gastos.
-> - Igual que en PresupuestoService, separa un método público calcular(...) que no use la base de datos, para probarlo con JUnit.
-> - DTO como record. El usuario se toma de la sesión (Principal), como en PresupuestoController.
->
-> Pruebas JUnit en BalanceServiceTest:
-> 1. 3 personas: A pagó 600, B y C pagaron 0. Cuota 200; B le paga 200 a A y C le paga 200 a A.
-> 2. Sin gastos: todo en 0 y sin transferencias.
-> 3. Un solo participante: sin transferencias.
-> 4. Un caso con decimales (por ejemplo 100 entre 3) donde la suma de saldos dé 0.00.
->
-> Crea el código completo de cada archivo, después los comandos cURL para probar (éxito, 403 y 404) y al final explícame en palabras simples cómo funciona el algoritmo de las transferencias, porque lo tengo que explicar al profesor.
+> Sigo con el proyecto Bitácora de viajes (Spring Boot 3.2.5, Java 17, MySQL). Ahora me toca HU-21: Balance de deudas del grupo. Los archivos ya existen pero están vacíos (solo tienen un comentario): BalanceService.java, BalanceController.java, BalanceServiceTest.java y los DTO BalanceResponse.java, SaldoResponse.java y TransferenciaResponse.java.
 
-Instrucción general de estilo dada en conversaciones anteriores:
-> "todo el codigo que consideres añadir o modificar debe ser: Limpio, sencillo, y entendible. Para que yo y cualquiera lo entienda completamente"
+>Requisitos:
+>- GET /api/viajes/{id}/balance devuelve {cuotaPorPersona, totalGastado, saldos:[{usuarioId, nombre, pagado, saldo}], transferencias:[{deudorId, deudorNombre, acreedorId, acreedorNombre, monto}]}.
+>- cuota = totalGastado / número de participantes. saldo de cada uno = lo que pagó - cuota (positivo: le deben; negativo: debe).
+>- Las transferencias se generan emparejando al que más debe con al que más le deben, hasta dejar todos los saldos en 0.
+>- BigDecimal con 2 decimales y RoundingMode.HALF_UP. La suma de los saldos debe dar 0; si sobra un centavo por redondeo, ajústalo para que cuadre.
+- Sin gastos: saldos en 0 y transferencias vacías. Con un solo participante: sin transferencias.
+>>- Solo participantes: 403. Viaje inexistente: 404. Reutiliza viajeDetalleService.buscarParticipacion(viajeId, correoUsuario), igual que en PresupuestoService.
+>- Usa participanteViajeRepository.buscarPorViaje(viajeId) para los participantes. Para lo que pagó cada uno, agrega a GastoRepository una consulta que sume monto agrupado por usuario.id en el viaje, sin cargar todos los gastos.
+>- Igual que en PresupuestoService, separa un método público calcular(...) que no use la base de datos, para probarlo con JUnit.
+>- DTO como record. El usuario se toma de la sesión (Principal), como en PresupuestoController.
+
+>Pruebas JUnit en BalanceServiceTest:
+>1. 3 personas: A pagó 600, B y C pagaron 0. Cuota 200; B le paga 200 a A y C le paga 200 a A.
+>2. Sin gastos: todo en 0 y sin transferencias.
+>3. Un solo participante: sin transferencias.
+>4. Un caso con decimales (por ejemplo 100 entre 3) donde la suma de saldos dé 0.00.
+
+>Al final explícame en palabras simples cómo funciona el algoritmo de las transferencias
 
 ### Respuesta de IA
 Se generaron seis archivos y se modificó uno:
