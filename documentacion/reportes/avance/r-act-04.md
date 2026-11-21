@@ -15,7 +15,9 @@
 - **Dana:** Login y registro en el frontend. Se hicieron las páginas de inicio de sesión y de registro con Thymeleaf, la validación de los datos antes de enviarlos, los errores debajo de cada campo y el botón «Cerrar sesión» en la barra de navegación.
 - **Stephanie:** Formulario de crear viaje (`/viajes/nuevo`) y Lista de viajes (`/viajes`) en el frontend. Se construyeron las plantillas Thymeleaf conectadas a `fragments/base.html`, la validación previa al envío y creación de viajes mediante `fetch()` hacia `POST /api/viajes`, y el listado en cuadrícula con tarjetas clicables hacia `/viajes/{id}`, distinción visual de rol (Organizador / Participante), filtros en vivo sin recargar la página por destino y rol (`GET /api/viajes?destino=...&rol=...`) y estado vacío («Aún no tienes viajes»).
 - **Stephanie:** Formulario de crear viaje (`/viajes/nuevo`), Lista de viajes (`/viajes`), Mensajes de confirmación y error en la UI (`mensajes.js` y `fragments/base.html`) y Checklist colaborativa de preparación y equipaje (`GET/POST /api/viajes/{id}/tareas`, `PATCH /api/tareas/{id}/toggle`, `DELETE /api/tareas/{id}` e interfaz en `#zona-checklist`).
-
+- **Dana:** Balance de deudas del grupo en el frontend. Se hizo la sección «Balance del grupo» en el detalle del viaje, con una tarjeta por participante y la lista de transferencias, que se actualiza sin recargar al registrar un gasto.
+- **Dana:** Conversor automático de divisas en el frontend. Se agregó el selector de moneda (MXN, USD, EUR) al formulario de gastos, que consulta el tipo de cambio a Frankfurter, muestra el equivalente en la moneda del viaje antes de enviar y guarda el gasto ya convertido, con aviso si no hay internet.
+- **Dana:** Conexión del backend con el frontend. Se configuró Maven para copiar `frontend/` a `static/` al compilar, y se borraron las copias de CSS y JS que vivían dentro del backend, para que los archivos vivan solo en `frontend/`. También se agregaron los archivos de cookies de sesión al `.gitignore`.
 - **Alfonso:** Votación en vivo en el frontend (`static/js/votos.js`). Cada botón de voto usa `fetch()` para votar (`POST /api/actividades/{id}/votos`) o quitar el voto (`DELETE` a la misma ruta) y actualiza el contador y el estado del botón con la respuesta `{actividadId, totalVotos, votadaPorMi}`, sin recargar la página. Antes de programar se revisó el estado real del backend de votos, las tarjetas de actividad y los mensajes compartidos.
 
 *(Pendiente: actividades del resto del equipo.)*
@@ -31,7 +33,8 @@
 | Lista de viajes en frontend con filtros (`/viajes`) | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/9a9bfe0](https://github.com/Peps06/desarrollo-web/commit/9a9bfe0) |
 | Mensajes compartidos de confirmación y error en UI | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/a3faeed](https://github.com/Peps06/desarrollo-web/commit/a3faeed) |
 | Endpoints y checklist colaborativa de tareas | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/14edfac](https://github.com/Peps06/desarrollo-web/commit/14edfac) |
-
+| Balance de deudas del grupo en el frontend | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/5f1c4393f450922f9619696ecadcca6c0ace6968](https://github.com/Peps06/desarrollo-web/commit/5f1c4393f450922f9619696ecadcca6c0ace6968) |
+| Conversor automático de divisas en el frontend | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/f4c4197dfdac9078351e8c3636b06a2df8ad9e0d](https://github.com/Peps06/desarrollo-web/commit/f4c4197dfdac9078351e8c3636b06a2df8ad9e0d) |
 | Votación en vivo con `fetch()` (`votos.js`) | Alfonso Mendoza Vásquez | [https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de](https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de) |
 
 *(Pendiente: filas de los demás integrantes.)*
@@ -56,6 +59,8 @@
 - Página de inicio de sesión con validación y mensajes de error (`/login`).
 - Página de registro con validación y mensajes de error (`/registro`).
 - Botón «Cerrar sesión» en la barra de navegación.
+- Sección «Balance del grupo» en el detalle del viaje (`#zona-balance`) con tarjetas por participante y lista de transferencias, actualizada sin recargar al registrar un gasto. Pendiente: re-agregar la línea `<script>` de `balance.js` en `detalle.html` y probarla en vivo.
+- Conversor de divisas en el formulario de gastos: selector de moneda, equivalente en la moneda del viaje antes de enviar y gasto guardado ya convertido, con aviso si falla el servicio externo.
 
 
 **Operativas / completadas (módulos de Stephanie):**
@@ -87,11 +92,10 @@
 - **Dana**
 
 - **Herramienta utilizada:** Claude (Anthropic)
-- **Actividad para la que se utilizó:** Diseño de las páginas de login y registro, la validación en JavaScript, el envío con `fetch()` y el botón de cerrar sesión.
-- **Código o contenido generado:** `login.html`, `registro.html`, `static/js/validacion.js`, `static/js/auth.js` y el botón de cerrar sesión en `fragments/base.html`.
-- **Modificaciones realizadas por el equipo:** Se usaron los fragmentos y las clases CSS que ya existían (`head`, `navbar`, `.formulario`, `.campo`, `.campo__error`, `.mensaje-error`). Se quitaron las credenciales de la versión de prueba.
-- **Forma en que se verificó el resultado:** Pruebas con `curl` y pruebas manuales en el navegador. El detalle está en `documentacion/reportes/ia-desarrollo/dana/r-ia-dev-s07.md`.
-
+- **Actividad para la que se utilizó:** Diseño de las páginas de login y registro, la validación en JavaScript, el envío con `fetch()` y el botón de cerrar sesión. También el balance de deudas del grupo y conversor automático de divisas en el frontend.
+- **Código o contenido generado:** `login.html`, `registro.html`, `frontend/js/validacion.js`, `frontend/js/auth.js` y el botón de cerrar sesión en `fragments/base.html`, frontend/js/balance.js`, `frontend/js/divisas.js`, cambios en `frontend/js/gastos.js` y en `detalle.html`, y la configuración de Maven en `backend/pom.xml` para copiar `frontend/` a `static/` al compilar.
+- **Modificaciones realizadas por el equipo:** Se usaron los fragmentos y las clases CSS que ya existían (`head`, `navbar`, `.formulario`, `.campo`, `.campo__error`, `.mensaje-error`). Se usaron las clases CSS que ya existían (`.saldo-favor`, `.saldo-deuda`, `.saldo-cero`, `.transferencia`, `.selector-moneda`, `.equivalente-cambio`) y el patrón de `presupuesto.js`; no se tocó el backend.
+- **Forma en que se verificó el resultado:** Pruebas con `curl` y pruebas manuales en el navegador. Revisión de sintaxis con `node --check` y pruebas en la consola del navegador (endpoint del balance, conversión y tipo de cambio).El detalle está en `documentacion/reportes/ia-desarrollo/dana/r-ia-dev-s07.md`.
 ---
 
 - **Stephanie**
@@ -126,7 +130,7 @@
 
 # 6. Participación individual
 
-- **Dana Carmona Santamaría:** Hizo las páginas de inicio de sesión y de registro, la validación de los datos, los mensajes de error y el botón de cerrar sesión. Revisó la respuesta del backend al registrar un correo repetido.
+- **Dana Carmona Santamaría:** Hizo las páginas de inicio de sesión y de registro, la validación de los datos, los mensajes de error y el botón de cerrar sesión. Revisó la respuesta del backend al registrar un correo repetido. También hizo el balance de deudas del grupo y el conversor de divisas en el frontend, y configuró Maven para que los archivos JS y CSS vivan solo en `frontend/`.
 - **Stephanie Elizdeth Hernández Prieto:** Desarrolló el formulario de creación de viajes (`/viajes/nuevo`) y la vista de listado de viajes (`/viajes`) con tarjetas diferenciadas por rol y filtros en tiempo real mediante `fetch()`, integrando la plantilla base compartida y corrigiendo el mapeo de rutas en `PaginaController`.
 
 - **Alfonso Mendoza Vásquez:** Revisó el backend de votos, las tarjetas de actividad y los mensajes compartidos antes de programar, y escribió `votos.js` para votar y quitar el voto con `fetch()` sin recargar la página. Documentó los cambios que necesita el código de Diego para conectar el botón y resolvió el error de conexión a MySQL al arrancar el servidor.
@@ -141,9 +145,10 @@
 - Implementación de los endpoints REST y la interfaz interactiva de checklist colaborativa dentro del detalle del viaje (`#zona-checklist`).
 - Integración del botón de voto en las tarjetas de actividad con Diego (botón `.btn-voto`, carga de `votos.js` en `detalle.html` y evento `viaje:recargar`) y pruebas de la votación en vivo con dos usuarios.
 - Pruebas integrales de flujo completo (registro, creación de viaje, actividades, votación, gastos, balance, checklist y exportación a PDF) y preparación de evidencias finales.
+- Re-agregar la línea `<script>` de `balance.js` en `detalle.html` y probar el balance en vivo en el navegador.
 
 ---
 
 ## Observaciones adicionales
 
-- Se recomienda mantener sincronizados los archivos de `frontend/js/` con `backend/src/main/resources/static/js/` antes de cada commit para que Spring Boot sirva siempre la versión más reciente de los scripts.
+- Los archivos JS y CSS viven solo en `frontend/`; Maven los copia a `static/` al compilar, así que ya no se copian a mano dentro del backend.
