@@ -20,6 +20,8 @@
 - **Dana:** Conexión del backend con el frontend. Se configuró Maven para copiar `frontend/` a `static/` al compilar, y se borraron las copias de CSS y JS que vivían dentro del backend, para que los archivos vivan solo en `frontend/`. También se agregaron los archivos de cookies de sesión al `.gitignore`.
 - **Alfonso:** Votación en vivo en el frontend (`static/js/votos.js`). Cada botón de voto usa `fetch()` para votar (`POST /api/actividades/{id}/votos`) o quitar el voto (`DELETE` a la misma ruta) y actualiza el contador y el estado del botón con la respuesta `{actividadId, totalVotos, votadaPorMi}`, sin recargar la página. Antes de programar se revisó el estado real del backend de votos, las tarjetas de actividad y los mensajes compartidos.
 
+- **Diego:** Detalle del viaje con línea de tiempo por días (`/viajes/{id}`) y Exportar itinerario a PDF (`GET /api/viajes/{id}/exportar-pdf`). Se construyó la plantilla `viajes/detalle.html` con encabezado, filtros y modal de confirmación, el script `viaje-detalle.js` (carga con `fetch()`, proponer, editar y eliminar actividades sin recargar, filtros por día y costo, evento `viaje:actualizado`), el servicio `PdfService` con OpenPDF y el controlador `ExportarPdfController`. También se ajustó `buscarParticipacion` para que un viaje cancelado responda 404.
+
 *(Pendiente: actividades del resto del equipo.)*
 
 ---
@@ -36,6 +38,7 @@
 | Balance de deudas del grupo en el frontend | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/5f1c4393f450922f9619696ecadcca6c0ace6968](https://github.com/Peps06/desarrollo-web/commit/5f1c4393f450922f9619696ecadcca6c0ace6968) |
 | Conversor automático de divisas en el frontend | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/f4c4197dfdac9078351e8c3636b06a2df8ad9e0d](https://github.com/Peps06/desarrollo-web/commit/f4c4197dfdac9078351e8c3636b06a2df8ad9e0d) |
 | Votación en vivo con `fetch()` (`votos.js`) | Alfonso Mendoza Vásquez | [https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de](https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de) |
+| Detalle del viaje con línea de tiempo y exportación del itinerario a PDF | Diego Rafael Jiménez Trujano | [https://github.com/Peps06/desarrollo-web/commit/cdb786eecd431fce11bb09a0501f3e2d6b5e1348](https://github.com/Peps06/desarrollo-web/commit/cdb786eecd431fce11bb09a0501f3e2d6b5e1348) |
 
 *(Pendiente: filas de los demás integrantes.)*
 
@@ -49,6 +52,10 @@
 - **Sesión caducada (`401`) en pruebas de permisos de tareas con `cURL` (Stephanie):** Al probar el acceso de un usuario ajeno a `/api/viajes/1/tareas` sin generar previamente una cookie de sesión vigente, Spring Security respondía `401` («Tu sesión expiró») antes de llegar al servicio. Se autenticó un usuario externo mediante `POST /api/auth/login` guardando su cookie y se verificó la respuesta `403` («No participas en este viaje»).
 - **Botón de voto ausente en las tarjetas (Alfonso):** Al revisar `viaje-detalle.js` se vio que las tarjetas de actividad solo muestran el texto «N votos» y no tienen botón de voto, y que `detalle.html` no carga `votos.js`. Como esos archivos son de Diego, no se modificaron; se le entregó el cambio exacto que necesita (un botón `.btn-voto` con su contador, la etiqueta `<script>` de `votos.js` y un listener del evento `viaje:recargar`). Hasta entonces `votos.js` no tiene un botón al cual conectarse.
 - **Error `Access denied` al arrancar el servidor (Alfonso):** `./mvnw spring-boot:run` desde PowerShell falló porque se conectó al MySQL de Windows, donde no existe el usuario `bitacora_app`, y no al MySQL de WSL donde estaban el usuario y los datos. Se resolvió arrancando la aplicación desde WSL.
+- **Viaje cancelado respondía 403 y no 404 (Diego):** Quien no participaba en un viaje cancelado recibía 403 porque `buscarParticipacion` solo comprobaba que el viaje existiera. Se cambió `existsById` por una consulta que también revisa el estado, para respetar el orden 404, 403 y 400.
+- **Script del detalle no servido por Spring (Diego):** El script estaba solo en `frontend/js/` y Spring sirve los archivos desde `static/`, por lo que la página no cargaba la lógica. Se agregó la copia en `backend/src/main/resources/static/js/`; después, el commit de conexión entre backend y frontend dejó `frontend/` como única fuente.
+- **Botones de editar y eliminar desalineados (Diego):** Quedaban mal alineados en la fila de la actividad; se movieron a una fila propia dentro de la información de la actividad.
+- **Ejecución en WSL (Diego):** `.\mvnw.cmd` no existe en WSL y devolvía «command not found». Se usó `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081`, con MySQL de WSL iniciado, porque el puerto 8080 estaba ocupado.
 
 ---
 
@@ -74,7 +81,11 @@
 
 **Operativas / completadas (módulos de Diego):**
 
-*(Pendiente)*
+- Detalle del viaje (`/viajes/{id}`) con encabezado (destino, fechas, participantes, presupuesto, gastado y restante) y línea de tiempo por días ordenada por hora, con marca de la actividad más votada y estado vacío por día.
+- Proponer, editar (incluso cambiando de día) y eliminar actividades sin recargar la página, con validación en cliente, errores del servidor con `mensajes.js`, modal de confirmación y botones visibles solo para el autor o el organizador.
+- Filtros de actividades por día y costo máximo sin recargar.
+- Exportar itinerario a PDF (`GET /api/viajes/{id}/exportar-pdf`) con OpenPDF: descarga `itinerario-<destino>.pdf` con respuestas 404, 403 y 401 según el caso.
+- Contenedores `zona-*` y evento `viaje:actualizado` para conectar los módulos de los demás integrantes.
 
 **Operativas / completadas (módulos de Alfonso):**
 
@@ -110,7 +121,11 @@
 
 - **Diego**
 
-*(Pendiente)*
+- **Herramienta utilizada:** Claude (Anthropic)
+- **Actividad para la que se utilizó:** Construcción de la página de detalle del viaje con línea de tiempo y gestión de actividades en JavaScript (`fetch()`), y del backend de exportación del itinerario a PDF con OpenPDF; además, consultas sobre decisiones técnicas del desarrollo y credenciales de prueba.
+- **Código o contenido generado:** `viajes/detalle.html`, `viaje-detalle.js` (en `frontend/js/`), `PdfService.java`, `ExportarPdfController.java` y un ajuste en `ViajeDetalleService.java`.
+- **Modificaciones realizadas por el equipo:** Ninguna antes del commit: el código subido es idéntico al generado. Se usaron las clases de `componentes.css`, el fragmento `base.html` y `mensajes.js` ya existentes.
+- **Forma en que se verificó el resultado:** Pruebas en el navegador y con `Invoke-WebRequest`. El detalle está en `documentacion/reportes/ia-desarrollo/diego/r-ia-dev-s03.md` y `documentacion/reportes/ia-documental/diego/r-ia-doc-s03.md`.
 
 ---
 
@@ -134,6 +149,7 @@
 - **Stephanie Elizdeth Hernández Prieto:** Desarrolló el formulario de creación de viajes (`/viajes/nuevo`) y la vista de listado de viajes (`/viajes`) con tarjetas diferenciadas por rol y filtros en tiempo real mediante `fetch()`, integrando la plantilla base compartida y corrigiendo el mapeo de rutas en `PaginaController`.
 
 - **Alfonso Mendoza Vásquez:** Revisó el backend de votos, las tarjetas de actividad y los mensajes compartidos antes de programar, y escribió `votos.js` para votar y quitar el voto con `fetch()` sin recargar la página. Documentó los cambios que necesita el código de Diego para conectar el botón y resolvió el error de conexión a MySQL al arrancar el servidor.
+- **Diego Rafael Jiménez Trujano:** Desarrolló la página de detalle del viaje con la línea de tiempo por días y la gestión de actividades sin recargar, y la exportación del itinerario a PDF con OpenPDF. Corrigió el orden de errores para viajes cancelados y dejó los contenedores y el evento que usan los demás módulos del detalle.
 
 *(Pendiente: participación del resto del equipo.)*
 
