@@ -16,6 +16,8 @@
 - **Stephanie:** Formulario de crear viaje (`/viajes/nuevo`) y Lista de viajes (`/viajes`) en el frontend. Se construyeron las plantillas Thymeleaf conectadas a `fragments/base.html`, la validación previa al envío y creación de viajes mediante `fetch()` hacia `POST /api/viajes`, y el listado en cuadrícula con tarjetas clicables hacia `/viajes/{id}`, distinción visual de rol (Organizador / Participante), filtros en vivo sin recargar la página por destino y rol (`GET /api/viajes?destino=...&rol=...`) y estado vacío («Aún no tienes viajes»).
 - **Stephanie:** Formulario de crear viaje (`/viajes/nuevo`), Lista de viajes (`/viajes`), Mensajes de confirmación y error en la UI (`mensajes.js` y `fragments/base.html`) y Checklist colaborativa de preparación y equipaje (`GET/POST /api/viajes/{id}/tareas`, `PATCH /api/tareas/{id}/toggle`, `DELETE /api/tareas/{id}` e interfaz en `#zona-checklist`).
 
+- **Alfonso:** Votación en vivo en el frontend (`static/js/votos.js`). Cada botón de voto usa `fetch()` para votar (`POST /api/actividades/{id}/votos`) o quitar el voto (`DELETE` a la misma ruta) y actualiza el contador y el estado del botón con la respuesta `{actividadId, totalVotos, votadaPorMi}`, sin recargar la página. Antes de programar se revisó el estado real del backend de votos, las tarjetas de actividad y los mensajes compartidos.
+
 *(Pendiente: actividades del resto del equipo.)*
 
 ---
@@ -30,6 +32,8 @@
 | Mensajes compartidos de confirmación y error en UI | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/a3faeed](https://github.com/Peps06/desarrollo-web/commit/a3faeed) |
 | Endpoints y checklist colaborativa de tareas | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/14edfac](https://github.com/Peps06/desarrollo-web/commit/14edfac) |
 
+| Votación en vivo con `fetch()` (`votos.js`) | Alfonso Mendoza Vásquez | [https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de](https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de) |
+
 *(Pendiente: filas de los demás integrantes.)*
 
 ---
@@ -40,6 +44,8 @@
 - **Ruta `/viajes` no mapeada en `PaginaController` (Stephanie):** Al navegar a `http://localhost:8085/viajes`, el servidor devolvía `{"codigo":404,"mensaje":"El recurso no existe"}` porque `PaginaController` tenía registradas `/viajes/nuevo` y `/viajes/{id}` pero faltaba `@GetMapping("/viajes")`. Se agregó el mapeo hacia `viajes/lista`.
 - **Sincronización de archivos estáticos y protocolo HTTPS en navegador (Stephanie):** Los scripts y hojas de estilo editados en `frontend/` no se reflejaban hasta copiarlos a `backend/src/main/resources/static/`, y el navegador intentó abrir inicialmente `https://localhost:8085` provocando un error de método inválido en Tomcat (`0x160x030x01`). Se sincronizaron los recursos estáticos y se verificó el acceso explícito mediante `http://`.
 - **Sesión caducada (`401`) en pruebas de permisos de tareas con `cURL` (Stephanie):** Al probar el acceso de un usuario ajeno a `/api/viajes/1/tareas` sin generar previamente una cookie de sesión vigente, Spring Security respondía `401` («Tu sesión expiró») antes de llegar al servicio. Se autenticó un usuario externo mediante `POST /api/auth/login` guardando su cookie y se verificó la respuesta `403` («No participas en este viaje»).
+- **Botón de voto ausente en las tarjetas (Alfonso):** Al revisar `viaje-detalle.js` se vio que las tarjetas de actividad solo muestran el texto «N votos» y no tienen botón de voto, y que `detalle.html` no carga `votos.js`. Como esos archivos son de Diego, no se modificaron; se le entregó el cambio exacto que necesita (un botón `.btn-voto` con su contador, la etiqueta `<script>` de `votos.js` y un listener del evento `viaje:recargar`). Hasta entonces `votos.js` no tiene un botón al cual conectarse.
+- **Error `Access denied` al arrancar el servidor (Alfonso):** `./mvnw spring-boot:run` desde PowerShell falló porque se conectó al MySQL de Windows, donde no existe el usuario `bitacora_app`, y no al MySQL de WSL donde estaban el usuario y los datos. Se resolvió arrancando la aplicación desde WSL.
 
 ---
 
@@ -67,7 +73,8 @@
 
 **Operativas / completadas (módulos de Alfonso):**
 
-*(Pendiente)*
+- `votos.js` terminado: alterna entre votar (`POST`) y quitar el voto (`DELETE`) según el estado del botón, actualiza contador y clase `votado` con la respuesta de la API, deshabilita el botón mientras la petición está en curso y lo rehabilita al terminar, y muestra los errores `400`, `403`, `404` y de red con las funciones de `mensajes.js` sin cambiar el contador. Usa un solo listener en `document` para que funcione aunque las tarjetas se vuelvan a crear.
+- **Pendiente de integración:** el botón de voto en las tarjetas, la carga de `votos.js` en `detalle.html` y el refresco de la insignia «Más votada» dependen de cambios en el código de Diego.
 
 **Operativas / completadas (módulos de Citlaly):**
 
@@ -105,7 +112,11 @@
 
 - **Alfonso**
 
-*(Pendiente)*
+- **Herramienta utilizada:** Claude Code (Anthropic), extensión de Visual Studio Code, modelos Claude Sonnet 5.5 y Claude Opus 5.5
+- **Actividad para la que se utilizó:** Diagnóstico del estado del proyecto y escritura de `votos.js` (votación en vivo con `fetch()`), además de consultas para levantar el servidor local y entrar con los usuarios de prueba.
+- **Código o contenido generado:** `frontend/js/votos.js` (funciones `actualizarBotonVoto` y `cambiarVoto` y un listener de clic en `document`).
+- **Modificaciones realizadas por el equipo:** Se reutilizaron `manejarErrorApi` y `mostrarErrorRed` de `mensajes.js` y las clases `.btn-voto`, `.votado` y `.btn-voto__contador` que ya existían en `componentes.css`. No se tocó código de otros integrantes.
+- **Forma en que se verificó el resultado:** Revisión de sintaxis con `node --check` y pruebas manuales en el navegador con los usuarios de prueba. Las pruebas completas dependen del botón de voto pendiente en las tarjetas. El detalle está en `documentacion/reportes/ia-desarrollo/alfonso/r-ia-dev-s05.md` y `documentacion/reportes/ia-documental/alfonso/r-ia-doc-s02.md`.
 
 ---
 
@@ -118,6 +129,8 @@
 - **Dana Carmona Santamaría:** Hizo las páginas de inicio de sesión y de registro, la validación de los datos, los mensajes de error y el botón de cerrar sesión. Revisó la respuesta del backend al registrar un correo repetido.
 - **Stephanie Elizdeth Hernández Prieto:** Desarrolló el formulario de creación de viajes (`/viajes/nuevo`) y la vista de listado de viajes (`/viajes`) con tarjetas diferenciadas por rol y filtros en tiempo real mediante `fetch()`, integrando la plantilla base compartida y corrigiendo el mapeo de rutas en `PaginaController`.
 
+- **Alfonso Mendoza Vásquez:** Revisó el backend de votos, las tarjetas de actividad y los mensajes compartidos antes de programar, y escribió `votos.js` para votar y quitar el voto con `fetch()` sin recargar la página. Documentó los cambios que necesita el código de Diego para conectar el botón y resolvió el error de conexión a MySQL al arrancar el servidor.
+
 *(Pendiente: participación del resto del equipo.)*
 
 ---
@@ -126,6 +139,7 @@
 
 - Integración del módulo compartido de notificaciones y traducción de errores HTTP en la interfaz (`mensajes.js` en `fragments/base.html`).
 - Implementación de los endpoints REST y la interfaz interactiva de checklist colaborativa dentro del detalle del viaje (`#zona-checklist`).
+- Integración del botón de voto en las tarjetas de actividad con Diego (botón `.btn-voto`, carga de `votos.js` en `detalle.html` y evento `viaje:recargar`) y pruebas de la votación en vivo con dos usuarios.
 - Pruebas integrales de flujo completo (registro, creación de viaje, actividades, votación, gastos, balance, checklist y exportación a PDF) y preparación de evidencias finales.
 
 ---
