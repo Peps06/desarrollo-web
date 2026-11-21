@@ -31,4 +31,9 @@ uploads/
 *.log
 logs/
 
+# ===== Cookies de sesion de curl (NO subir) =====
+cookies.txt
+cookies_part.txt
+
+
 
