@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let esOrganizador = false;    // Si el usuario es organizador del viaje
     let monedaBase = "MXN";
     let gastoEditandoId = null;   // Id del gasto en edición; null cuando se registra uno nuevo
+    let tipoCambioActual = 1;     // Tipo de cambio de la moneda elegida; null si no se pudo consultar
 
     zonaGastos.innerHTML = `
         <div class="tarjeta pila">
@@ -53,12 +54,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span class="campo__error"></span>
                     </div>
 
-                    <div class="campo">
-                        <label for="inputMonto" class="campo__etiqueta">Monto (<span id="etiquetaMonto">MXN</span>)</label>
-                        <input type="number" id="inputMonto" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00">
-                        <span class="campo__error"></span>
+                    <div class="selector-moneda">
+                        <div class="campo">
+                            <label for="inputMonto" class="campo__etiqueta">Monto (<span id="etiquetaMonto">MXN</span>)</label>
+                            <input type="number" id="inputMonto" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00">
+                            <span class="campo__error"></span>
+                        </div>
+                        <div class="campo">
+                            <label for="selectMoneda" class="campo__etiqueta">Moneda</label>
+                            <select id="selectMoneda"></select>
+                        </div>
                     </div>
                 </div>
+                <p id="equivalenteMoneda" class="equivalente-cambio oculto" role="status"></p>
 
                 <div class="campo" id="campoComprobante">
                     <label for="inputComprobante" class="campo__etiqueta">Comprobante (opcional)</label>
@@ -87,6 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectCategoria = document.getElementById("selectCategoria");
     const inputMonto = document.getElementById("inputMonto");
     const etiquetaMonto = document.getElementById("etiquetaMonto");
+    const selectMoneda = document.getElementById("selectMoneda");
+    const equivalenteMoneda = document.getElementById("equivalenteMoneda");
     const campoComprobante = document.getElementById("campoComprobante");
     const inputComprobante = document.getElementById("inputComprobante");
     const nombreComprobante = document.getElementById("nombreComprobante");
@@ -124,6 +134,57 @@ document.addEventListener("DOMContentLoaded", () => {
     // Solo el autor del gasto o el organizador del viaje pueden editarlo o eliminarlo
     function puedeModificar(gasto) {
         return esOrganizador || (usuarioActualId !== null && gasto.usuarioId === usuarioActualId);
+    }
+
+    /* ---------- Moneda y conversión ---------- */
+
+    // Muestra u oculta la línea de equivalente
+    function mostrarTextoEquivalente(texto) {
+        equivalenteMoneda.textContent = texto;
+        equivalenteMoneda.classList.toggle("oculto", !texto);
+    }
+
+    // Muestra cuánto equivale el monto en la moneda del viaje
+    function mostrarEquivalente() {
+        if (gastoEditandoId !== null) return;
+
+        const moneda = selectMoneda.value;
+        const monto = Number(inputMonto.value);
+
+        if (moneda === monedaBase || !monto || monto <= 0) {
+            mostrarTextoEquivalente("");
+            return;
+        }
+        if (tipoCambioActual === null) {
+            mostrarTextoEquivalente(`No pudimos consultar el tipo de cambio. Puedes capturar el monto en ${monedaBase}.`);
+            return;
+        }
+        const equivale = convertirAMonedaBase(monto, tipoCambioActual);
+        mostrarTextoEquivalente(`Equivale a ${formatearMontoDivisa(equivale, monedaBase)} al tipo de cambio de hoy`);
+    }
+
+    // Al cambiar la moneda se pide el tipo de cambio; si falla, se avisa y se puede usar la moneda del viaje
+    async function cambiarMoneda() {
+        const moneda = selectMoneda.value;
+        etiquetaMonto.textContent = moneda;
+
+        if (moneda === monedaBase) {
+            tipoCambioActual = 1;
+            mostrarEquivalente();
+            return;
+        }
+
+        tipoCambioActual = null;
+        mostrarTextoEquivalente("Consultando tipo de cambio...");
+        try {
+            const tasa = await obtenerTipoCambio(moneda, monedaBase);
+            if (selectMoneda.value !== moneda) return;  // Ya eligieron otra moneda
+            tipoCambioActual = tasa;
+        } catch (error) {
+            if (selectMoneda.value !== moneda) return;
+            mostrarMensaje("aviso", "No pudimos consultar el tipo de cambio. Puedes capturar el monto en la moneda del viaje.");
+        }
+        mostrarEquivalente();
     }
 
     /* ---------- Errores del formulario ---------- */
@@ -181,6 +242,13 @@ document.addEventListener("DOMContentLoaded", () => {
             valido = false;
         }
 
+        // Al editar la moneda no cambia: el monto se guarda tal como se escribió
+        const moneda = gastoEditandoId === null ? selectMoneda.value : monedaBase;
+        if (moneda !== monedaBase && tipoCambioActual === null) {
+            mostrarErrorCampo("selectMoneda", "No hay tipo de cambio. Espera un momento o usa la moneda del viaje.");
+            valido = false;
+        }
+
         if (comprobante && !TIPOS_COMPROBANTE.includes(comprobante.type)) {
             mostrarErrorCampo("inputComprobante", "El comprobante debe ser jpg, png o webp.");
             valido = false;
@@ -193,7 +261,17 @@ document.addEventListener("DOMContentLoaded", () => {
             formGasto.querySelector(".campo--invalido input, .campo--invalido select")?.focus();
             return null;
         }
-        return { concepto, categoria, monto, comprobante };
+        // El monto se guarda en la moneda del viaje; el original y el tipo de cambio quedan de respaldo
+        const tipo = moneda === monedaBase ? 1 : tipoCambioActual;
+        return {
+            concepto,
+            categoria,
+            comprobante,
+            monto: moneda === monedaBase ? monto : convertirAMonedaBase(monto, tipo),
+            monedaOriginal: moneda,
+            montoOriginal: monto,
+            tipoCambio: tipo
+        };
     }
 
     function actualizarNombreComprobante() {
@@ -206,6 +284,11 @@ document.addEventListener("DOMContentLoaded", () => {
         formGasto.reset();
         limpiarErrores();
         actualizarNombreComprobante();
+        selectMoneda.value = monedaBase;
+        selectMoneda.disabled = false;
+        etiquetaMonto.textContent = monedaBase;
+        tipoCambioActual = 1;
+        mostrarTextoEquivalente("");
     }
 
     // Si el archivo elegido no sirve, se avisa de inmediato y se quita
@@ -229,6 +312,11 @@ document.addEventListener("DOMContentLoaded", () => {
         inputConcepto.value = gasto.concepto;
         selectCategoria.value = gasto.categoria;
         inputMonto.value = Number(gasto.monto).toFixed(2);
+        // La moneda original no se puede cambiar al editar; solo se muestra como información
+        selectMoneda.disabled = true;
+        if (gasto.monedaOriginal && gasto.monedaOriginal !== monedaBase) {
+            mostrarTextoEquivalente(`Registrado como ${Number(gasto.montoOriginal).toFixed(2)} ${gasto.monedaOriginal} (tipo de cambio ${Number(gasto.tipoCambio)})`);
+        }
         // El backend no permite cambiar el comprobante al editar, por eso se oculta el campo
         campoComprobante.classList.add("oculto");
         btnGuardarGasto.textContent = "Guardar cambios";
@@ -244,6 +332,8 @@ document.addEventListener("DOMContentLoaded", () => {
         btnCancelarEdicion.classList.add("oculto");
     }
 
+    selectMoneda.addEventListener("change", cambiarMoneda);
+    inputMonto.addEventListener("input", mostrarEquivalente);
     btnCancelarEdicion.addEventListener("click", terminarEdicion);
 
     /* ---------- Peticiones ---------- */
@@ -272,6 +362,9 @@ document.addEventListener("DOMContentLoaded", () => {
             formulario.append("concepto", datos.concepto);
             formulario.append("categoria", datos.categoria);
             formulario.append("monto", String(datos.monto));
+            formulario.append("monedaOriginal", datos.monedaOriginal);
+            formulario.append("montoOriginal", String(datos.montoOriginal));
+            formulario.append("tipoCambio", String(datos.tipoCambio));
             formulario.append("comprobante", datos.comprobante);
             respuesta = await pedir("/api/gastos", { method: "POST", body: formulario });
         } else {
@@ -282,7 +375,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     viajeId: Number(viajeId),
                     concepto: datos.concepto,
                     categoria: datos.categoria,
-                    monto: datos.monto
+                    monto: datos.monto,
+                    monedaOriginal: datos.monedaOriginal,
+                    montoOriginal: datos.montoOriginal,
+                    tipoCambio: datos.tipoCambio
                 })
             });
         }
@@ -476,6 +572,7 @@ document.addEventListener("DOMContentLoaded", () => {
         esOrganizador = String(viaje.rol).toUpperCase() === "ORGANIZADOR";
         monedaBase = viaje.monedaBase || "MXN";
         etiquetaMonto.textContent = monedaBase;
+        llenarSelectorMoneda(selectMoneda, monedaBase);
         renderizarLista();
     });
 
