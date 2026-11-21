@@ -71,6 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="campo" id="campoComprobante">
                     <label for="inputComprobante" class="campo__etiqueta">Comprobante (opcional)</label>
                     <input type="file" id="inputComprobante" accept="image/jpeg,image/png,image/webp">
+                    <img id="vistaPreviaComprobante" class="oculto" alt="Vista previa del comprobante"
+                         style="max-width: 160px; max-height: 160px; border-radius: var(--radio-sm); border: 1px solid var(--borde); margin-top: var(--espacio-2);">
                     <span class="campo__ayuda">Jpg, png o webp, máximo 2 MB.</span>
                     <div class="fila">
                         <span id="nombreComprobante" class="texto-suave"></span>
@@ -87,6 +89,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <p id="estadoVacioGastos" class="tarjeta-dia__vacio oculto">Aún no hay gastos registrados para este viaje.</p>
             <ul id="listaGastos" style="list-style: none; padding: 0; margin: 0;"></ul>
+
+            <dialog id="dialogoComprobante" aria-labelledby="tituloComprobante" style="max-width: min(90vw, 560px); width: 100%;">
+                <div class="fila" style="justify-content: space-between; margin-bottom: var(--espacio-3);">
+                    <h3 id="tituloComprobante" class="tarjeta__titulo" style="margin: 0;">Comprobante</h3>
+                    <button type="button" id="btnCerrarX" class="btn btn-texto btn-pequeno" aria-label="Cerrar">&times;</button>
+                </div>
+                <div style="background: var(--glaciar-claro); border-radius: var(--radio-sm); padding: var(--espacio-3); display: flex; justify-content: center; min-height: 160px; align-items: center;">
+                    <img id="imagenComprobante" class="oculto" alt="Comprobante del gasto" style="max-width: 100%; max-height: 60vh; height: auto;">
+                    <p id="mensajeComprobante" class="mensaje-error oculto" role="alert" style="margin: 0;"></p>
+                </div>
+                <dl id="detallesComprobante" style="display: grid; grid-template-columns: auto 1fr; gap: var(--espacio-2) var(--espacio-3); margin: var(--espacio-3) 0;"></dl>
+                <div class="fila" style="justify-content: flex-end;">
+                    <button type="button" id="btnCerrarComprobante" class="btn btn-secundario btn-pequeno">Cerrar</button>
+                </div>
+            </dialog>
         </div>
     `;
 
@@ -105,8 +122,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnCancelarEdicion = document.getElementById("btnCancelarEdicion");
     const estadoVacioGastos = document.getElementById("estadoVacioGastos");
     const listaGastos = document.getElementById("listaGastos");
+    const vistaPreviaComprobante = document.getElementById("vistaPreviaComprobante");
+    const dialogoComprobante = document.getElementById("dialogoComprobante");
+    const tituloComprobante = document.getElementById("tituloComprobante");
+    const imagenComprobante = document.getElementById("imagenComprobante");
+    const mensajeComprobante = document.getElementById("mensajeComprobante");
+    const detallesComprobante = document.getElementById("detallesComprobante");
+    const btnCerrarX = document.getElementById("btnCerrarX");
+    const btnCerrarComprobante = document.getElementById("btnCerrarComprobante");
 
-    /* ---------- Formatos y permisos ---------- */
+    let urlVistaPrevia = null;    // URL temporal de la vista previa; se libera al cambiar el archivo
+    let urlComprobante = null;    // URL temporal del comprobante abierto en la modal
 
     function formatearMoneda(monto, moneda) {
         const valor = Number(monto ?? 0);
@@ -278,6 +304,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const archivo = inputComprobante.files[0];
         nombreComprobante.textContent = archivo ? archivo.name : "";
         btnQuitarComprobante.classList.toggle("oculto", !archivo);
+
+        // Libera la vista previa anterior y muestra la del archivo elegido
+        if (urlVistaPrevia) URL.revokeObjectURL(urlVistaPrevia);
+        urlVistaPrevia = null;
+        vistaPreviaComprobante.removeAttribute("src");
+        vistaPreviaComprobante.classList.add("oculto");
+
+        if (archivo && TIPOS_COMPROBANTE.includes(archivo.type)) {
+            urlVistaPrevia = URL.createObjectURL(archivo);
+            vistaPreviaComprobante.src = urlVistaPrevia;
+            vistaPreviaComprobante.classList.remove("oculto");
+        }
     }
 
     function limpiarFormulario() {
@@ -466,7 +504,79 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /* ---------- Lista ---------- */
+    function mostrarMensajeComprobante(texto) {
+        imagenComprobante.classList.add("oculto");
+        mensajeComprobante.textContent = texto;
+        mensajeComprobante.classList.remove("oculto");
+    }
+
+    // Muestra los datos del gasto debajo de la imagen, como en el wireframe 10
+    function pintarDetallesComprobante(gasto) {
+        detallesComprobante.innerHTML = "";
+        const filas = [
+            ["Concepto:", gasto.concepto],
+            ["Monto:", formatearMoneda(gasto.monto, monedaBase)],
+            ["Quién pagó:", gasto.usuarioNombre || "Un participante"]
+        ];
+        filas.forEach(([etiqueta, valor]) => {
+            const dt = document.createElement("dt");
+            dt.style.fontWeight = "600";
+            dt.textContent = etiqueta;
+            const dd = document.createElement("dd");
+            dd.style.margin = "0";
+            dd.textContent = valor;
+            detallesComprobante.append(dt, dd);
+        });
+    }
+
+    // Pide el comprobante con la cookie de sesión. Así un 403 se muestra dentro de la modal.
+    async function abrirComprobante(gasto) {
+        tituloComprobante.textContent = `Comprobante: ${gasto.concepto}`;
+        pintarDetallesComprobante(gasto);
+        mostrarMensajeComprobante("Cargando comprobante...");
+        dialogoComprobante.showModal();
+
+        try {
+            const respuesta = await pedir(gasto.comprobanteUrl, { headers: { "Accept": "image/*" } });
+
+            if (!respuesta.ok) {
+                if (respuesta.status === 401) {
+                    dialogoComprobante.close();
+                    await manejarErrorApi(respuesta);
+                    return;
+                }
+                mostrarMensajeComprobante(
+                    respuesta.status === 403
+                        ? "No tienes permiso para ver este comprobante."
+                        : "No se pudo cargar el comprobante."
+                );
+                return;
+            }
+
+            const imagen = await respuesta.blob();
+            if (urlComprobante) URL.revokeObjectURL(urlComprobante);
+            urlComprobante = URL.createObjectURL(imagen);
+            imagenComprobante.src = urlComprobante;
+            mensajeComprobante.classList.add("oculto");
+            imagenComprobante.classList.remove("oculto");
+        } catch (error) {
+            mostrarMensajeComprobante("Sin conexión con el servidor. No se pudo cargar el comprobante.");
+        }
+    }
+
+    btnCerrarX.addEventListener("click", () => dialogoComprobante.close());
+    btnCerrarComprobante.addEventListener("click", () => dialogoComprobante.close());
+
+    // Al cerrar se libera la imagen para no dejarla en memoria
+    dialogoComprobante.addEventListener("close", () => {
+        imagenComprobante.removeAttribute("src");
+        if (urlComprobante) {
+            URL.revokeObjectURL(urlComprobante);
+            urlComprobante = null;
+        }
+    });
+
+    /* Lista  */
 
     function crearFilaGasto(gasto) {
         const fila = document.createElement("li");
@@ -486,12 +596,13 @@ document.addEventListener("DOMContentLoaded", () => {
         info.append(concepto, detalle);
 
         if (gasto.comprobanteUrl) {
-            const enlace = document.createElement("a");
-            enlace.href = gasto.comprobanteUrl;
-            enlace.target = "_blank";
-            enlace.rel = "noopener";
-            enlace.textContent = "Ver comprobante";
-            info.appendChild(enlace);
+            const btnVer = document.createElement("button");
+            btnVer.type = "button";
+            btnVer.className = "btn btn-texto btn-pequeno";
+            btnVer.textContent = "Ver comprobante";
+            btnVer.setAttribute("aria-label", `Ver comprobante de ${gasto.concepto}`);
+            btnVer.addEventListener("click", () => abrirComprobante(gasto));
+            info.appendChild(btnVer);
         }
 
         const acciones = document.createElement("div");
