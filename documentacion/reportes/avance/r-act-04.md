@@ -19,25 +19,30 @@
 - **Dana:** Conversor automático de divisas en el frontend. Se agregó el selector de moneda (MXN, USD, EUR) al formulario de gastos, que consulta el tipo de cambio a Frankfurter, muestra el equivalente en la moneda del viaje antes de enviar y guarda el gasto ya convertido, con aviso si no hay internet.
 - **Dana:** Conexión del backend con el frontend. Se configuró Maven para copiar `frontend/` a `static/` al compilar, y se borraron las copias de CSS y JS que vivían dentro del backend, para que los archivos vivan solo en `frontend/`. También se agregaron los archivos de cookies de sesión al `.gitignore`.
 - **Alfonso:** Votación en vivo en el frontend (`static/js/votos.js`). Cada botón de voto usa `fetch()` para votar (`POST /api/actividades/{id}/votos`) o quitar el voto (`DELETE` a la misma ruta) y actualiza el contador y el estado del botón con la respuesta `{actividadId, totalVotos, votadaPorMi}`, sin recargar la página. Antes de programar se revisó el estado real del backend de votos, las tarjetas de actividad y los mensajes compartidos.
+- **Citlaly:** Listado de gastos por viaje en el backend (`GET /api/viajes/{id}/gastos`), solo para participantes, y ampliación de la respuesta de gastos con nombre de quien pagó, moneda original, tipo de cambio y ruta del comprobante. Se renombró `totalViaje` a `totalGastado` para cumplir `api.md`. Formulario, lista y edición/eliminación de gastos en `gastos.js` con `fetch()`, sin recargar la página (HU-31). Barra de presupuesto en `presupuesto.js` con colores por porcentaje, aviso de presupuesto excedido y actualización del encabezado al cambiar un gasto (HU-32). Vista previa del comprobante antes de guardar y ventana modal para verlo, con concepto, monto, quién pagó y mensaje de permiso (HU-39).
 
-*(Pendiente: actividades del resto del equipo.)*
+_(Pendiente: actividades de Diego.)_
 
 ---
 
 # 2. Evidencias de trabajo
 
-| Actividad | Integrante responsable | Enlace a commit |
-| :--- | :--- | :--- |
-| Login y registro en el frontend | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/702fff77765d6726d7748f55771c5997bd00d4b4](https://github.com/Peps06/desarrollo-web/commit/702fff77765d6726d7748f55771c5997bd00d4b4) |
-| Formulario de crear viaje en frontend (`/viajes/nuevo`) | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/d41feee](https://github.com/Peps06/desarrollo-web/commit/d41feee)  |
-| Lista de viajes en frontend con filtros (`/viajes`) | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/9a9bfe0](https://github.com/Peps06/desarrollo-web/commit/9a9bfe0) |
-| Mensajes compartidos de confirmación y error en UI | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/a3faeed](https://github.com/Peps06/desarrollo-web/commit/a3faeed) |
-| Endpoints y checklist colaborativa de tareas | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/14edfac](https://github.com/Peps06/desarrollo-web/commit/14edfac) |
-| Balance de deudas del grupo en el frontend | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/5f1c4393f450922f9619696ecadcca6c0ace6968](https://github.com/Peps06/desarrollo-web/commit/5f1c4393f450922f9619696ecadcca6c0ace6968) |
-| Conversor automático de divisas en el frontend | Dana Carmona Santamaría | [https://github.com/Peps06/desarrollo-web/commit/f4c4197dfdac9078351e8c3636b06a2df8ad9e0d](https://github.com/Peps06/desarrollo-web/commit/f4c4197dfdac9078351e8c3636b06a2df8ad9e0d) |
-| Votación en vivo con `fetch()` (`votos.js`) | Alfonso Mendoza Vásquez | [https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de](https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de) |
+| Actividad                                                                               | Integrante responsable              | Enlace a commit                                                                                                                                                                      |
+| :-------------------------------------------------------------------------------------- | :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Login y registro en el frontend                                                         | Dana Carmona Santamaría             | [https://github.com/Peps06/desarrollo-web/commit/702fff77765d6726d7748f55771c5997bd00d4b4](https://github.com/Peps06/desarrollo-web/commit/702fff77765d6726d7748f55771c5997bd00d4b4) |
+| Formulario de crear viaje en frontend (`/viajes/nuevo`)                                 | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/d41feee](https://github.com/Peps06/desarrollo-web/commit/d41feee)                                                                   |
+| Lista de viajes en frontend con filtros (`/viajes`)                                     | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/9a9bfe0](https://github.com/Peps06/desarrollo-web/commit/9a9bfe0)                                                                   |
+| Mensajes compartidos de confirmación y error en UI                                      | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/a3faeed](https://github.com/Peps06/desarrollo-web/commit/a3faeed)                                                                   |
+| Endpoints y checklist colaborativa de tareas                                            | Stephanie Elizdeth Hernández Prieto | [https://github.com/Peps06/desarrollo-web/commit/14edfac](https://github.com/Peps06/desarrollo-web/commit/14edfac)                                                                   |
+| Balance de deudas del grupo en el frontend                                              | Dana Carmona Santamaría             | [https://github.com/Peps06/desarrollo-web/commit/5f1c4393f450922f9619696ecadcca6c0ace6968](https://github.com/Peps06/desarrollo-web/commit/5f1c4393f450922f9619696ecadcca6c0ace6968) |
+| Conversor automático de divisas en el frontend                                          | Dana Carmona Santamaría             | [https://github.com/Peps06/desarrollo-web/commit/f4c4197dfdac9078351e8c3636b06a2df8ad9e0d](https://github.com/Peps06/desarrollo-web/commit/f4c4197dfdac9078351e8c3636b06a2df8ad9e0d) |
+| Votación en vivo con `fetch()` (`votos.js`)                                             | Alfonso Mendoza Vásquez             | [https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de](https://github.com/Peps06/desarrollo-web/commit/152ae73e5d7f95c57b02944bb0d500a3dbd950de) |
+| HU-31: registrar, editar y eliminar gastos (`gastos.js`) y listado por viaje en backend | Citlaly Morales Viveros             | [https://github.com/Peps06/desarrollo-web/commit/ae5826e](https://github.com/Peps06/desarrollo-web/commit/ae5826e)                                                                   |
+| HU-32: barra de progreso del presupuesto (`presupuesto.js`)                             | Citlaly Morales Viveros             | [https://github.com/Peps06/desarrollo-web/commit/44c2fb5](https://github.com/Peps06/desarrollo-web/commit/44c2fb5)                                                                   |
+| HU-39: vista previa y modal de comprobantes                                             | Citlaly Morales Viveros             | [https://github.com/Peps06/desarrollo-web/commit/3c01b024cd2c919440e6943a5c6dc1d97ac80222](https://github.com/Peps06/desarrollo-web/commit/3c01b024cd2c919440e6943a5c6dc1d97ac80222) |
+| Merge de las historias de gastos, presupuesto y comprobantes                            | Citlaly Morales Viveros             | [https://github.com/Peps06/desarrollo-web/commit/b4e39a915d9197afa57ec38ce5cfa4e27a03d198](https://github.com/Peps06/desarrollo-web/commit/b4e39a915d9197afa57ec38ce5cfa4e27a03d198) |
 
-*(Pendiente: filas de los demás integrantes.)*
+_(Pendiente: filas de Diego.)_
 
 ---
 
@@ -49,6 +54,9 @@
 - **Sesión caducada (`401`) en pruebas de permisos de tareas con `cURL` (Stephanie):** Al probar el acceso de un usuario ajeno a `/api/viajes/1/tareas` sin generar previamente una cookie de sesión vigente, Spring Security respondía `401` («Tu sesión expiró») antes de llegar al servicio. Se autenticó un usuario externo mediante `POST /api/auth/login` guardando su cookie y se verificó la respuesta `403` («No participas en este viaje»).
 - **Botón de voto ausente en las tarjetas (Alfonso):** Al revisar `viaje-detalle.js` se vio que las tarjetas de actividad solo muestran el texto «N votos» y no tienen botón de voto, y que `detalle.html` no carga `votos.js`. Como esos archivos son de Diego, no se modificaron; se le entregó el cambio exacto que necesita (un botón `.btn-voto` con su contador, la etiqueta `<script>` de `votos.js` y un listener del evento `viaje:recargar`). Hasta entonces `votos.js` no tiene un botón al cual conectarse.
 - **Error `Access denied` al arrancar el servidor (Alfonso):** `./mvnw spring-boot:run` desde PowerShell falló porque se conectó al MySQL de Windows, donde no existe el usuario `bitacora_app`, y no al MySQL de WSL donde estaban el usuario y los datos. Se resolvió arrancando la aplicación desde WSL.
+- **Error `bad interpreter` al ejecutar `./mvnw` (Citlaly):** El archivo `mvnw` tenía saltos de línea de Windows (CRLF) y Linux no los reconoce. Se resolvió convirtiéndolo a LF con `sed -i 's/\r$//' mvnw` y dándole permiso de ejecución con `chmod +x mvnw`. Después la aplicación compiló y arrancó.
+- **Error `Access denied` de MySQL para `bitacora_app` (Citlaly):** Spring no podía conectarse a la base con ese usuario, aunque el login directo desde WSL sí respondía. Se investigó el puerto (`3306` lo usaba solo la instancia de WSL) y la clave configurada. La causa fue que habia un caracter no detectado en la contraseña, se resolvió con una clave distinta en `application.properties`.
+- **Archivo `gastos.js` modificado por el equipo (Citlaly):** Al agregar la vista previa y la modal de comprobantes se partió de la versión del equipo, que ya tenía la conversión de divisas de Dana, y no se quitó esa parte.
 
 ---
 
@@ -62,19 +70,16 @@
 - Sección «Balance del grupo» en el detalle del viaje (`#zona-balance`) con tarjetas por participante y lista de transferencias, actualizada sin recargar al registrar un gasto. Pendiente: re-agregar la línea `<script>` de `balance.js` en `detalle.html` y probarla en vivo.
 - Conversor de divisas en el formulario de gastos: selector de moneda, equivalente en la moneda del viaje antes de enviar y gasto guardado ya convertido, con aviso si falla el servicio externo.
 
-
 **Operativas / completadas (módulos de Stephanie):**
 
 - Formulario de creación de viaje (`/viajes/nuevo`) con validación de destino, fechas coherentes (`fechaFin >= fechaInicio`), presupuesto mayor a cero y moneda (`MXN`, `USD`, `EUR`), envío asíncrono con `fetch()` y redirección al detalle del viaje creado.
-- Vista de lista de viajes (`/viajes`) con cuadrícula responsiva de tarjetas, insignia diferenciada para Organizador y Participante, enlace directo al detalle `/viajes/{id}`, filtrado dinámico en vivo por destino (con *debounce*) y por rol sin recargar la página, y vista de estado vacío («Aún no tienes viajes»).
-- Formulario de creación de viaje (`/viajes/nuevo`) con validación en cliente y envío `fetch()`.
-- Vista de lista de viajes (`/viajes`) con distinción visual de rol, filtros dinámicos sin recarga por destino y rol y estado vacío.
+- Vista de lista de viajes (`/viajes`) con cuadrícula responsiva de tarjetas, insignia diferenciada para Organizador y Participante, enlace directo al detalle `/viajes/{id}`, filtrado dinámico en vivo por destino (con _debounce_) y por rol sin recargar la página, y vista de estado vacío («Aún no tienes viajes»).
 - Módulo compartido de mensajes flotantes (`mensajes.js` en `fragments/base.html`) con auto-cierre en 4 segundos, cierre manual y traducción de errores HTTP (`400`, `401`, `403`, `404` y error de red).
 - Endpoints REST de tareas y checklist colaborativa en `#zona-checklist` (`viajes/detalle.html`) con contador «X de Y completadas», alta, eliminación y marcado tachado en tiempo real persistido en MySQL.
 
 **Operativas / completadas (módulos de Diego):**
 
-*(Pendiente)*
+_(Pendiente)_
 
 **Operativas / completadas (módulos de Alfonso):**
 
@@ -83,7 +88,11 @@
 
 **Operativas / completadas (módulos de Citlaly):**
 
-*(Pendiente)*
+- Listado de gastos por viaje en el backend (`GET /api/viajes/{id}/gastos`), solo para participantes, con nombre de quien pagó, moneda original, tipo de cambio y ruta del comprobante en la respuesta.
+- Formulario de gastos (`gastos.js`): registro con validación, edición y eliminación con confirmación. Editar y eliminar aparecen solo para el autor del gasto o el organizador.
+- Barra de presupuesto (`presupuesto.js`): estados de color por porcentaje (menor a 75%, de 75% a 100% y arriba de 100%), aviso de presupuesto excedido y actualización del encabezado del viaje al cambiar un gasto.
+- Comprobantes: subida con vista previa antes de guardar, y ventana modal para ver la imagen con concepto, monto y quién pagó, o un mensaje si no hay permiso.
+- **Pendiente de prueba:** flujo completo con dos usuarios (participante y organizador), confirmación de que la imagen se muestra en la modal, y verificación de la clase `mensaje-error` en `mensajes.js`.
 
 ---
 
@@ -93,9 +102,10 @@
 
 - **Herramienta utilizada:** Claude (Anthropic)
 - **Actividad para la que se utilizó:** Diseño de las páginas de login y registro, la validación en JavaScript, el envío con `fetch()` y el botón de cerrar sesión. También el balance de deudas del grupo y conversor automático de divisas en el frontend.
-- **Código o contenido generado:** `login.html`, `registro.html`, `frontend/js/validacion.js`, `frontend/js/auth.js` y el botón de cerrar sesión en `fragments/base.html`, frontend/js/balance.js`, `frontend/js/divisas.js`, cambios en `frontend/js/gastos.js` y en `detalle.html`, y la configuración de Maven en `backend/pom.xml` para copiar `frontend/` a `static/` al compilar.
+- **Código o contenido generado:** `login.html`, `registro.html`, `frontend/js/validacion.js`, `frontend/js/auth.js` y el botón de cerrar sesión en `fragments/base.html`, `frontend/js/balance.js`, `frontend/js/divisas.js`, cambios en `frontend/js/gastos.js` y en `detalle.html`, y la configuración de Maven en `backend/pom.xml` para copiar `frontend/` a `static/` al compilar.
 - **Modificaciones realizadas por el equipo:** Se usaron los fragmentos y las clases CSS que ya existían (`head`, `navbar`, `.formulario`, `.campo`, `.campo__error`, `.mensaje-error`). Se usaron las clases CSS que ya existían (`.saldo-favor`, `.saldo-deuda`, `.saldo-cero`, `.transferencia`, `.selector-moneda`, `.equivalente-cambio`) y el patrón de `presupuesto.js`; no se tocó el backend.
-- **Forma en que se verificó el resultado:** Pruebas con `curl` y pruebas manuales en el navegador. Revisión de sintaxis con `node --check` y pruebas en la consola del navegador (endpoint del balance, conversión y tipo de cambio).El detalle está en `documentacion/reportes/ia-desarrollo/dana/r-ia-dev-s07.md`.
+- **Forma en que se verificó el resultado:** Pruebas con `curl` y pruebas manuales en el navegador. Revisión de sintaxis con `node --check` y pruebas en la consola del navegador (endpoint del balance, conversión y tipo de cambio). El detalle está en `documentacion/reportes/ia-desarrollo/dana/r-ia-dev-s07.md`.
+
 ---
 
 - **Stephanie**
@@ -110,7 +120,7 @@
 
 - **Diego**
 
-*(Pendiente)*
+_(Pendiente)_
 
 ---
 
@@ -124,7 +134,14 @@
 
 ---
 
-- *(Pendiente: uso de IA generativa de Citlaly Morales Viveros)*
+- **Citlaly**
+
+- **Herramienta utilizada:** Claude (Anthropic), en claude.ai.
+- **Actividad para la que se utilizó:** Generación de código para HU-31 (backend y frontend), HU-32 y HU-39. Modificación de `gastos.js` para agregar la vista previa y la ventana modal de comprobantes. Explicaciones para ejecutar el proyecto desde WSL y para resolver errores de arranque (CRLF en `mvnw` y conexión a MySQL).
+- **Código o contenido generado:** `GastoRepository.java` (consulta por viaje), `GastoService.java` (método `listarPorViaje`), `GastoResponse.java`, `GastoRegistradoResponse.java`, `ViajeDetalleController.java` (endpoint de gastos), `frontend/js/gastos.js` (versión inicial y vista previa/modal de comprobantes), `frontend/js/presupuesto.js` y el `<script>` de `presupuesto.js` en `detalle.html`.
+- **Modificaciones realizadas por el equipo:** Dana agregó la conversión de divisas a `gastos.js`, el `<script>` de `balance.js` y la configuración de Maven. Citlaly agregó la vista previa y la modal de comprobantes sobre la versión del equipo.
+- **Forma en que se verificó el resultado:** La revisión de sintaxis con `node --check` y con pruebas manuales en la interfaz desde el navegador con los datos de prueba.
+- Los detalles están en `documentacion/reportes/ia-desarrollo/citlaly/` (`r-ia-dev-s02` a `s05`) y en `documentacion/reportes/ia-documental/citlaly/r-ia-doc-s01.md`.
 
 ---
 
@@ -132,10 +149,10 @@
 
 - **Dana Carmona Santamaría:** Hizo las páginas de inicio de sesión y de registro, la validación de los datos, los mensajes de error y el botón de cerrar sesión. Revisó la respuesta del backend al registrar un correo repetido. También hizo el balance de deudas del grupo y el conversor de divisas en el frontend, y configuró Maven para que los archivos JS y CSS vivan solo en `frontend/`.
 - **Stephanie Elizdeth Hernández Prieto:** Desarrolló el formulario de creación de viajes (`/viajes/nuevo`) y la vista de listado de viajes (`/viajes`) con tarjetas diferenciadas por rol y filtros en tiempo real mediante `fetch()`, integrando la plantilla base compartida y corrigiendo el mapeo de rutas en `PaginaController`.
-
 - **Alfonso Mendoza Vásquez:** Revisó el backend de votos, las tarjetas de actividad y los mensajes compartidos antes de programar, y escribió `votos.js` para votar y quitar el voto con `fetch()` sin recargar la página. Documentó los cambios que necesita el código de Diego para conectar el botón y resolvió el error de conexión a MySQL al arrancar el servidor.
+- **Citlaly Morales Viveros:** Implementó el listado de gastos por viaje en el backend y la respuesta ampliada de gastos. Desarrolló la interfaz de gastos (formulario, lista, edición y eliminación), la barra de presupuesto con actualización al cambiar gastos, y la vista previa y ventana modal de comprobantes. Resolvió el error de ejecución de `mvnw` en WSL, investigó el error de conexión a MySQL y documentó el uso de IA en sus reportes.
 
-*(Pendiente: participación del resto del equipo.)*
+_(Pendiente: participación de Diego.)_
 
 ---
 
