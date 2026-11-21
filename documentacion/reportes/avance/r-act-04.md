@@ -20,8 +20,7 @@
 - **Dana:** Conexión del backend con el frontend. Se configuró Maven para copiar `frontend/` a `static/` al compilar, y se borraron las copias de CSS y JS que vivían dentro del backend, para que los archivos vivan solo en `frontend/`. También se agregaron los archivos de cookies de sesión al `.gitignore`.
 - **Alfonso:** Votación en vivo en el frontend (`static/js/votos.js`). Cada botón de voto usa `fetch()` para votar (`POST /api/actividades/{id}/votos`) o quitar el voto (`DELETE` a la misma ruta) y actualiza el contador y el estado del botón con la respuesta `{actividadId, totalVotos, votadaPorMi}`, sin recargar la página. Antes de programar se revisó el estado real del backend de votos, las tarjetas de actividad y los mensajes compartidos.
 - **Citlaly:** Listado de gastos por viaje en el backend (`GET /api/viajes/{id}/gastos`), solo para participantes, y ampliación de la respuesta de gastos con nombre de quien pagó, moneda original, tipo de cambio y ruta del comprobante. Se renombró `totalViaje` a `totalGastado` para cumplir `api.md`. Formulario, lista y edición/eliminación de gastos en `gastos.js` con `fetch()`, sin recargar la página (HU-31). Barra de presupuesto en `presupuesto.js` con colores por porcentaje, aviso de presupuesto excedido y actualización del encabezado al cambiar un gasto (HU-32). Vista previa del comprobante antes de guardar y ventana modal para verlo, con concepto, monto, quién pagó y mensaje de permiso (HU-39).
-
-_(Pendiente: actividades de Diego.)_
+- **Diego:** Detalle del viaje con línea de tiempo por días (`/viajes/{id}`) y Exportar itinerario a PDF (`GET /api/viajes/{id}/exportar-pdf`). Se construyó la plantilla `viajes/detalle.html` con encabezado, filtros y modal de confirmación, el script `viaje-detalle.js` (carga con `fetch()`, proponer, editar y eliminar actividades sin recargar, filtros por día y costo, evento `viaje:actualizado`), el servicio `PdfService` con OpenPDF y el controlador `ExportarPdfController`. También se ajustó `buscarParticipacion` para que un viaje cancelado responda 404.
 
 ---
 
@@ -41,8 +40,7 @@ _(Pendiente: actividades de Diego.)_
 | HU-32: barra de progreso del presupuesto (`presupuesto.js`)                             | Citlaly Morales Viveros             | [https://github.com/Peps06/desarrollo-web/commit/44c2fb5](https://github.com/Peps06/desarrollo-web/commit/44c2fb5)                                                                   |
 | HU-39: vista previa y modal de comprobantes                                             | Citlaly Morales Viveros             | [https://github.com/Peps06/desarrollo-web/commit/3c01b024cd2c919440e6943a5c6dc1d97ac80222](https://github.com/Peps06/desarrollo-web/commit/3c01b024cd2c919440e6943a5c6dc1d97ac80222) |
 | Merge de las historias de gastos, presupuesto y comprobantes                            | Citlaly Morales Viveros             | [https://github.com/Peps06/desarrollo-web/commit/b4e39a915d9197afa57ec38ce5cfa4e27a03d198](https://github.com/Peps06/desarrollo-web/commit/b4e39a915d9197afa57ec38ce5cfa4e27a03d198) |
-
-_(Pendiente: filas de Diego.)_
+| Detalle del viaje con línea de tiempo y exportación del itinerario a PDF | Diego Rafael Jiménez Trujano | [https://github.com/Peps06/desarrollo-web/commit/cdb786eecd431fce11bb09a0501f3e2d6b5e1348](https://github.com/Peps06/desarrollo-web/commit/cdb786eecd431fce11bb09a0501f3e2d6b5e1348) |
 
 ---
 
@@ -57,6 +55,10 @@ _(Pendiente: filas de Diego.)_
 - **Error `bad interpreter` al ejecutar `./mvnw` (Citlaly):** El archivo `mvnw` tenía saltos de línea de Windows (CRLF) y Linux no los reconoce. Se resolvió convirtiéndolo a LF con `sed -i 's/\r$//' mvnw` y dándole permiso de ejecución con `chmod +x mvnw`. Después la aplicación compiló y arrancó.
 - **Error `Access denied` de MySQL para `bitacora_app` (Citlaly):** Spring no podía conectarse a la base con ese usuario, aunque el login directo desde WSL sí respondía. Se investigó el puerto (`3306` lo usaba solo la instancia de WSL) y la clave configurada. La causa fue que habia un caracter no detectado en la contraseña, se resolvió con una clave distinta en `application.properties`.
 - **Archivo `gastos.js` modificado por el equipo (Citlaly):** Al agregar la vista previa y la modal de comprobantes se partió de la versión del equipo, que ya tenía la conversión de divisas de Dana, y no se quitó esa parte.
+- **Viaje cancelado respondía 403 y no 404 (Diego):** Quien no participaba en un viaje cancelado recibía 403 porque `buscarParticipacion` solo comprobaba que el viaje existiera. Se cambió `existsById` por una consulta que también revisa el estado, para respetar el orden 404, 403 y 400.
+- **Script del detalle no servido por Spring (Diego):** El script estaba solo en `frontend/js/` y Spring sirve los archivos desde `static/`, por lo que la página no cargaba la lógica. Se agregó la copia en `backend/src/main/resources/static/js/`; después, el commit de conexión entre backend y frontend dejó `frontend/` como única fuente.
+- **Botones de editar y eliminar desalineados (Diego):** Quedaban mal alineados en la fila de la actividad; se movieron a una fila propia dentro de la información de la actividad.
+- **Ejecución en WSL (Diego):** `.\mvnw.cmd` no existe en WSL y devolvía «command not found». Se usó `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081`, con MySQL de WSL iniciado, porque el puerto 8080 estaba ocupado.
 
 ---
 
@@ -79,7 +81,11 @@ _(Pendiente: filas de Diego.)_
 
 **Operativas / completadas (módulos de Diego):**
 
-_(Pendiente)_
+- Detalle del viaje (`/viajes/{id}`) con encabezado (destino, fechas, participantes, presupuesto, gastado y restante) y línea de tiempo por días ordenada por hora, con marca de la actividad más votada y estado vacío por día.
+- Proponer, editar (incluso cambiando de día) y eliminar actividades sin recargar la página, con validación en cliente, errores del servidor con `mensajes.js`, modal de confirmación y botones visibles solo para el autor o el organizador.
+- Filtros de actividades por día y costo máximo sin recargar.
+- Exportar itinerario a PDF (`GET /api/viajes/{id}/exportar-pdf`) con OpenPDF: descarga `itinerario-<destino>.pdf` con respuestas 404, 403 y 401 según el caso.
+- Contenedores `zona-*` y evento `viaje:actualizado` para conectar los módulos de los demás integrantes.
 
 **Operativas / completadas (módulos de Alfonso):**
 
@@ -120,7 +126,11 @@ _(Pendiente)_
 
 - **Diego**
 
-_(Pendiente)_
+- **Herramienta utilizada:** Claude (Anthropic)
+- **Actividad para la que se utilizó:** Construcción de la página de detalle del viaje con línea de tiempo y gestión de actividades en JavaScript (`fetch()`), y del backend de exportación del itinerario a PDF con OpenPDF; además, consultas sobre decisiones técnicas del desarrollo y credenciales de prueba.
+- **Código o contenido generado:** `viajes/detalle.html`, `viaje-detalle.js` (en `frontend/js/`), `PdfService.java`, `ExportarPdfController.java` y un ajuste en `ViajeDetalleService.java`.
+- **Modificaciones realizadas por el equipo:** Ninguna antes del commit: el código subido es idéntico al generado. Se usaron las clases de `componentes.css`, el fragmento `base.html` y `mensajes.js` ya existentes.
+- **Forma en que se verificó el resultado:** Pruebas en el navegador y con `Invoke-WebRequest`. El detalle está en `documentacion/reportes/ia-desarrollo/diego/r-ia-dev-s03.md` y `documentacion/reportes/ia-documental/diego/r-ia-doc-s03.md`.
 
 ---
 
@@ -136,10 +146,10 @@ _(Pendiente)_
 
 - **Citlaly**
 
-- **Herramienta utilizada:** Claude (Anthropic), en claude.ai.
+- **Herramienta utilizada:** Claude (Anthropic), en claude.ai modelo Calude Haiku 5.5 medio.
 - **Actividad para la que se utilizó:** Generación de código para HU-31 (backend y frontend), HU-32 y HU-39. Modificación de `gastos.js` para agregar la vista previa y la ventana modal de comprobantes. Explicaciones para ejecutar el proyecto desde WSL y para resolver errores de arranque (CRLF en `mvnw` y conexión a MySQL).
 - **Código o contenido generado:** `GastoRepository.java` (consulta por viaje), `GastoService.java` (método `listarPorViaje`), `GastoResponse.java`, `GastoRegistradoResponse.java`, `ViajeDetalleController.java` (endpoint de gastos), `frontend/js/gastos.js` (versión inicial y vista previa/modal de comprobantes), `frontend/js/presupuesto.js` y el `<script>` de `presupuesto.js` en `detalle.html`.
-- **Modificaciones realizadas por el equipo:** Dana agregó la conversión de divisas a `gastos.js`, el `<script>` de `balance.js` y la configuración de Maven. Citlaly agregó la vista previa y la modal de comprobantes sobre la versión del equipo.
+- **Modificaciones realizadas por el equipo:** Dana agregó la conversión de divisas a `gastos.js`, el `<script>` de `balance.js` y la configuración de Maven. Yo agregé la vista previa y la modal de comprobantes sobre la versión del equipo.
 - **Forma en que se verificó el resultado:** La revisión de sintaxis con `node --check` y con pruebas manuales en la interfaz desde el navegador con los datos de prueba.
 - Los detalles están en `documentacion/reportes/ia-desarrollo/citlaly/` (`r-ia-dev-s02` a `s05`) y en `documentacion/reportes/ia-documental/citlaly/r-ia-doc-s01.md`.
 
@@ -151,6 +161,7 @@ _(Pendiente)_
 - **Stephanie Elizdeth Hernández Prieto:** Desarrolló el formulario de creación de viajes (`/viajes/nuevo`) y la vista de listado de viajes (`/viajes`) con tarjetas diferenciadas por rol y filtros en tiempo real mediante `fetch()`, integrando la plantilla base compartida y corrigiendo el mapeo de rutas en `PaginaController`.
 - **Alfonso Mendoza Vásquez:** Revisó el backend de votos, las tarjetas de actividad y los mensajes compartidos antes de programar, y escribió `votos.js` para votar y quitar el voto con `fetch()` sin recargar la página. Documentó los cambios que necesita el código de Diego para conectar el botón y resolvió el error de conexión a MySQL al arrancar el servidor.
 - **Citlaly Morales Viveros:** Implementó el listado de gastos por viaje en el backend y la respuesta ampliada de gastos. Desarrolló la interfaz de gastos (formulario, lista, edición y eliminación), la barra de presupuesto con actualización al cambiar gastos, y la vista previa y ventana modal de comprobantes. Resolvió el error de ejecución de `mvnw` en WSL, investigó el error de conexión a MySQL y documentó el uso de IA en sus reportes.
+- **Diego Rafael Jiménez Trujano:** Desarrolló la página de detalle del viaje con la línea de tiempo por días y la gestión de actividades sin recargar, y la exportación del itinerario a PDF con OpenPDF. Corrigió el orden de errores para viajes cancelados y dejó los contenedores y el evento que usan los demás módulos del detalle.
 
 _(Pendiente: participación de Diego.)_
 
