@@ -147,10 +147,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${valor < 0 ? "-" : ""}$${formateado} ${moneda || "MXN"}`;
     }
 
-    function textoVotos(total) {
-        return total === 1 ? "1 voto" : `${total} votos`;
-    }
-
     function esOrganizador() {
         return String(viaje?.rol).toUpperCase() === "ORGANIZADOR";
     }
@@ -412,12 +408,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const costo = document.createElement("strong");
         costo.textContent = formatearMoneda(actividad.costoEstimado, viaje.monedaBase);
 
-        const votos = document.createElement("span");
-        votos.className = "insignia";
-        votos.dataset.votos = actividad.totalVotos;
-        votos.textContent = textoVotos(actividad.totalVotos);
+        // Botón de voto: votos.js lo atiende y actualiza el contador y el estado.
+        const btnVoto = document.createElement("button");
+        btnVoto.type = "button";
+        btnVoto.className = actividad.votadaPorMi ? "btn btn-voto votado" : "btn btn-voto";
+        btnVoto.setAttribute("aria-pressed", String(Boolean(actividad.votadaPorMi)));
+        btnVoto.setAttribute("aria-label", `Votar por ${actividad.titulo}`);
 
-        datos.append(costo, votos);
+        // Ícono fijo (pulgar arriba): no cambia con el estado porque votos.js no lo actualiza.
+        const iconoVoto = document.createElement("span");
+        iconoVoto.setAttribute("aria-hidden", "true");
+        iconoVoto.textContent = "\u{1F44D}";
+
+        const contadorVoto = document.createElement("span");
+        contadorVoto.className = "btn-voto__contador";
+        contadorVoto.textContent = actividad.totalVotos;
+        btnVoto.append(iconoVoto, contadorVoto);
+
+        datos.append(costo, btnVoto);
 
         // Editar y eliminar solo para el autor de la actividad o el organizador del viaje.
         if (puedeModificar(actividad)) {
@@ -937,6 +945,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     btnExportarPdf.addEventListener("click", exportarPdf);
+
+    // votos.js avisa cuando cambia un voto: se recarga el detalle para refrescar "Más votada".
+    document.addEventListener("viaje:recargar", () => {
+        recargarDetalle();
+    });
 
     cargarPagina();
 });
