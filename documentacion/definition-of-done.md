@@ -16,7 +16,7 @@ Una historia de usuario (HU) se considera terminada solo cuando cumple **todos**
 - [ ] La identidad del usuario se toma siempre de la sesión, nunca de un id que mande el cliente.
 - [ ] Si la HU toca dinero, los montos se calculan con 2 decimales y el presupuesto se recalcula después de crear, editar o eliminar.
 - [ ] Si la HU toca el frontend, el cambio se ve sin recargar la página cuando así lo pide el criterio (fetch), y los mensajes de éxito o error usan `mensajes.js`.
-- [ ] Commit con el formato `HU-XX: descripción corta`, en una rama `feature/hu-XX-nombre`.
+- [ ] Commit con el formato `HU-XX: descripción corta`.
 - [ ] Pull request revisado por otro integrante del equipo y fusionado a `main`. Nada se sube directo a `main`.
 - [ ] `git log` muestra commits de los 5 integrantes del equipo.
 

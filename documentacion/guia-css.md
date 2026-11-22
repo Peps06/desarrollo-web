@@ -4,7 +4,7 @@
 
 Autora: Citlaly Morales Viveros (Cliente / Programadora XP)
 
-CSS propio, sin Bootstrap ni frameworks. Los estilos viven en `src/main/resources/static/css/`. Si una vista necesita un cambio de HTML, se le pide a quien sea responsable de ese archivo.
+CSS propio, sin Bootstrap ni frameworks. Los estilos viven en `frontend/css/`. Si una vista necesita un cambio de HTML, se le pide a quien sea responsable de ese archivo.
 
 ## Orden de carga
 

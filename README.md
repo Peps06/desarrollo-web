@@ -32,14 +32,14 @@ flowchart LR
 - **Dana Carmona Santamaria**
 - **Diego Rafael Jimenez Trujano**
 - **Stephanie Elizdeth Hernandez Prieto**
-- **Morales Viveros Citlaly**
+- **Citlaly Morales Viveros**
 
 ## Estructura del repositorio
 
 ```
 desarrollo-web/
 ├── backend/          Proyecto Spring Boot (Maven)
-├── frontend/         Páginas HTML, CSS y JavaScript
+├── frontend/         CSS y JavaScript
 ├── database/         Esquema SQL de referencia
 ├── documentacion/    Guías, API, diagramas y reportes
 └── README.md
