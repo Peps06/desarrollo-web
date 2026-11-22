@@ -12,11 +12,19 @@ La planeación de un viaje en grupo termina dispersa en chats, notas y capturas;
 
 ## Tecnologías y arquitectura (3 capas)
 
-| Capa | Tecnología |
-|---|---|
-| Presentación | HTML, CSS y JavaScript (Thymeleaf + `fetch()` para actualizar sin recargar) |
-| Lógica de negocio | Java 17 + Spring Boot 3.2.5 (Web, Validation, Security) |
-| Acceso a datos | Spring Data JPA + MySQL |
+| Capa              | Tecnología                                                                  |
+| ----------------- | --------------------------------------------------------------------------- |
+| Presentación      | HTML, CSS y JavaScript (Thymeleaf + `fetch()` para actualizar sin recargar) |
+| Lógica de negocio | Java 17 + Spring Boot 3.2.5 (Web, Validation, Security)                     |
+| Acceso a datos    | Spring Data JPA + MySQL                                                     |
+
+El navegador se comunica con el backend mediante `fetch()` y formularios; el backend expone la API REST, aplica las reglas de negocio y accede a la base por medio de JPA.
+
+```mermaid
+flowchart LR
+    A["Presentación<br>(HTML, CSS, JS)"] -->|"fetch() / formularios"| B["Lógica de negocio<br>(Spring Boot)"]
+    B -->|"Spring Data JPA"| C[("MySQL<br>bitacora_viajes")]
+```
 
 ## Equipo
 
@@ -44,11 +52,12 @@ desarrollo-web/
 - Maven.
 - MySQL 8.
 - Git.
+- curl, para probar la API REST desde la terminal.
 
 Instalación en Ubuntu:
 
 ```bash
-sudo apt update && sudo apt install -y openjdk-17-jdk maven mysql-server git
+sudo apt update && sudo apt install -y openjdk-17-jdk maven mysql-server git curl
 java -version
 ```
 
@@ -81,6 +90,22 @@ EXIT;
 El nombre de la base debe ser `bitacora_viajes` para todo el equipo. El usuario y la clave son de cada integrante y deben coincidir con los datos de `application.properties`.
 
 Las tablas no se crean a mano: las genera la aplicación al arrancar, a partir de las entidades del proyecto. El archivo `database/esquema.sql` es la referencia del diseño y sirve para comparar.
+
+El diseño completo está en `documentacion/diseño-base-datos.md` y el diagrama entidad-relación en `documentacion/evidencias/diagrama-er.png`:
+
+![Diagrama entidad-relación](documentacion/evidencias/diagrama-er.png)
+
+Las 7 tablas del sistema:
+
+| Tabla                | Guarda                                                                       |
+| -------------------- | ---------------------------------------------------------------------------- |
+| `usuario`            | Cuentas: nombre, correo único y contraseña con hash                          |
+| `viaje`              | Destino, fechas, presupuesto total y moneda base                             |
+| `participante_viaje` | Relación N:M entre usuarios y viajes, con rol (`organizador`/`participante`) |
+| `actividad`          | Propuestas del itinerario: título, día, hora y costo estimado                |
+| `voto`               | Un voto por persona por actividad                                            |
+| `gasto`              | Concepto, categoría, monto en moneda original y tipo de cambio               |
+| `tarea`              | Checklist del viaje y si está completada                                     |
 
 ## Configuración local
 
@@ -129,7 +154,7 @@ La aplicación queda disponible en `http://localhost:8080`.
 
 ## Qué debe funcionar
 
-Antes de dar por terminada una parte del proyecto, revisar lo siguiente:
+Antes de dar por terminada una parte del proyecto, revisa lo siguiente:
 
 - La aplicación arranca sin errores y la consola muestra `Started BitacoraViajesApplication`.
 - La base `bitacora_viajes` contiene las 7 tablas: `actividad`, `gasto`, `participante_viaje`, `tarea`, `usuario`, `viaje` y `voto`.
@@ -155,13 +180,13 @@ Deben aparecer 7 tablas. El conteo de usuarios debe ser `2` si solo se han carga
 
 Al arrancar por primera vez, la aplicación carga datos de prueba si la base de datos no tiene usuarios. Si reinicias la aplicación, no se vuelven a cargar.
 
-| Dato | Contenido |
-|---|---|
-| Usuarios | `ana@example.com` (organizadora) y `luis@example.com` (participante). Contraseña: `Password123` |
-| Viaje | Oaxaca, del 20 al 27 de diciembre de 2026, presupuesto de 15,000.00 MXN |
-| Actividades | Visita a Hierve el Agua (2 votos) y Cena en el Mercado 20 de Noviembre (1 voto) |
-| Gastos | Hospedaje de 4,500.00 MXN y taller de cerámica de 30.00 USD con tipo de cambio 17.5 (525.00 MXN) |
-| Tareas | Reservar hospedaje (completada) y comprar boletos de autobús (pendiente) |
+| Dato        | Contenido                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| Usuarios    | `ana@example.com` (organizadora) y `luis@example.com` (participante). Contraseña: `Password123`  |
+| Viaje       | Oaxaca, del 20 al 27 de diciembre de 2026, presupuesto de 15,000.00 MXN                          |
+| Actividades | Visita a Hierve el Agua (2 votos) y Cena en el Mercado 20 de Noviembre (1 voto)                  |
+| Gastos      | Hospedaje de 4,500.00 MXN y taller de cerámica de 30.00 USD con tipo de cambio 17.5 (525.00 MXN) |
+| Tareas      | Reservar hospedaje (completada) y comprar boletos de autobús (pendiente)                         |
 
 La contraseña de los datos de prueba solo se usa en desarrollo.
 
@@ -171,17 +196,81 @@ Para volver a cargar los datos desde cero, borra la base y créala de nuevo:
 sudo mysql -e "DROP DATABASE bitacora_viajes; CREATE DATABASE bitacora_viajes CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
+## API REST
+
+El catálogo completo, con contratos y ejemplos de cada endpoint, está en `documentacion/api.md`. Resumen:
+
+| Grupo                 | Verbos y rutas                                                                                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Autenticación         | `POST /api/auth/registro`, `POST /api/auth/login`, `POST /api/auth/logout`                                                               |
+| Viajes                | `POST /api/viajes`, `GET /api/viajes`, `GET /api/viajes/{id}`, `PUT /api/viajes/{id}`, `DELETE /api/viajes/{id}`                         |
+| Participantes         | `GET /api/viajes/{id}/participantes`, `POST /api/viajes/{id}/participantes`, `DELETE /api/viajes/{id}/participantes/{usuarioId}`         |
+| Actividades           | `POST /api/viajes/{id}/actividades`, `GET /api/viajes/{id}/actividades`, `PUT /api/actividades/{id}`, `DELETE /api/actividades/{id}`     |
+| Votos                 | `POST /api/actividades/{id}/votos`, `DELETE /api/actividades/{id}/votos`                                                                 |
+| Gastos                | `POST /api/gastos`, `GET /api/viajes/{id}/gastos`, `PUT /api/gastos/{id}`, `DELETE /api/gastos/{id}`, `GET /api/gastos/{id}/comprobante` |
+| Presupuesto y balance | `GET /api/viajes/{id}/presupuesto`, `GET /api/viajes/{id}/balance`                                                                       |
+| Tareas                | `GET /api/viajes/{id}/tareas`, `POST /api/viajes/{id}/tareas`, `PATCH /api/tareas/{id}/toggle`, `DELETE /api/tareas/{id}`                |
+| Exportar              | `GET /api/viajes/{id}/exportar-pdf`                                                                                                      |
+
+Convenciones: JSON en `camelCase`, fechas `yyyy-MM-dd`, montos con 2 decimales. Las rutas de `/api/**` exigen sesión salvo las de autenticación, y los errores comparten el formato `{ "codigo": 404, "mensaje": "..." }`.
+
+Ejemplo de inicio de sesión con `curl`, probado con los datos de prueba:
+
+```bash
+curl -i -c cookies.txt -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"correo": "ana@example.com", "contrasena": "Password123"}'
+```
+
+Una respuesta correcta devuelve `200` y la cookie de sesión:
+
+```json
+{ "id": 1, "nombre": "Ana López", "correo": "ana@example.com" }
+```
+
+Con esa cookie ya se puede llamar al resto de la API, por ejemplo para crear un viaje:
+
+```bash
+curl -i -b cookies.txt -X POST http://localhost:8080/api/viajes \
+  -H "Content-Type: application/json" \
+  -d '{"destino": "Guadalajara", "fechaInicio": "2027-03-05", "fechaFin": "2027-03-08",
+       "presupuestoTotal": 8000.00, "monedaBase": "MXN"}'
+```
+
+No se sube `cookies.txt` a GitHub.
+
+## Pruebas
+
+Las pruebas necesitan la base de datos levantada, porque una de ellas carga el contexto completo de la aplicación. Con MySQL activo, desde la carpeta `backend`:
+
+```bash
+sudo service mysql start
+./mvnw test
+```
+
+Las pruebas unitarias cubren los servicios que calculan resultados:
+
+- `ActividadGanadoraServiceTest`: la actividad más votada de cada día, incluyendo los casos de empate por votos, costo y orden de creación.
+- `PresupuestoServiceTest`: gastos dentro y fuera del presupuesto.
+- `BalanceServiceTest`: saldos de deudas del grupo, incluido el caso donde la suma de saldos da cero.
+
+Al terminar, la salida debe mostrar `BUILD SUCCESS` y el resumen de pruebas sin fallos:
+
+```
+Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+```
+
 ## Problemas comunes
 
-| Mensaje | Causa y solución |
-|---|---|
-| `Communications link failure` | MySQL está apagado. Ejecuta `sudo service mysql start`. |
-| `Access denied for user` | El usuario o la clave de `application.properties` no coinciden con los de MySQL. |
-| `Unknown database 'bitacora_viajes'` | Falta el comando `CREATE DATABASE` de la sección Base de datos. |
-| `mvnw: Permission denied` | Ejecuta `chmod +x mvnw` dentro de `backend`. |
-| `/bin/sh^M: bad interpreter` | El archivo tiene saltos de línea de Windows. Ejecuta `sed -i 's/\r$//' mvnw`. |
-| `release version 17 not supported` | Instala JDK 17 con `sudo apt install openjdk-17-jdk`. |
-| `Port 8080 was already in use` | Otra aplicación usa el puerto. Cambia `server.port` en `application.properties`. |
+| Mensaje                              | Causa y solución                                                                 |
+| ------------------------------------ | -------------------------------------------------------------------------------- |
+| `Communications link failure`        | MySQL está apagado. Ejecuta `sudo service mysql start`.                          |
+| `Access denied for user`             | El usuario o la clave de `application.properties` no coinciden con los de MySQL. |
+| `Unknown database 'bitacora_viajes'` | Falta el comando `CREATE DATABASE` de la sección Base de datos.                  |
+| `mvnw: Permission denied`            | Ejecuta `chmod +x mvnw` dentro de `backend`.                                     |
+| `/bin/sh^M: bad interpreter`         | El archivo tiene saltos de línea de Windows. Ejecuta `sed -i 's/\r$//' mvnw`.    |
+| `release version 17 not supported`   | Instala JDK 17 con `sudo apt install openjdk-17-jdk`.                            |
+| `Port 8080 was already in use`       | Otra aplicación usa el puerto. Cambia `server.port` en `application.properties`. |
 
 ## Seguridad
 
@@ -210,11 +299,5 @@ Un cambio está terminado cuando:
 - Se probó el caso de éxito y el caso de error.
 - El commit está subido a `main`.
 - La documentación afectada está actualizada.
+
 ---
-
-## Pendientes de documentación
-
-- [ ] Diagrama de la arquitectura de 3 capas
-- [ ] Endpoints REST con ejemplos (`documentacion/api.md`)
-- [ ] Diagrama del modelo de datos (`documentacion/evidencias/diagrama-er.png`)
-- [ ] Cómo correr las pruebas y los resultados esperados
