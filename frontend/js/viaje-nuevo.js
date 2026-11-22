@@ -1,6 +1,20 @@
+// Formulario de crear y editar viaje (HU-27 + HU-23, frontend).
+// Basado en frontend/js/viaje-nuevo.js del ZIP desarrollo-web_0_yj7j.zip
+// (cabeza 96f7c78, tag V4, 20 nov 2026). Cambios respecto a esa versión:
+// - Modo edición: si la página es /viajes/{id}/editar, el formulario carga
+//   los datos del viaje con GET /api/viajes/{id}, cambia el título a
+//   "Editar viaje" y el botón a "Guardar cambios", y al enviar usa
+//   PUT /api/viajes/{id} en lugar de POST /api/viajes.
+// - La ruta /viajes/{id}/editar vive en PaginaController.java (incluido
+//   en esta misma carpeta) y devuelve la misma plantilla viajes/nuevo.
+// - El botón Editar solo lo ve la organizadora (en viajes-lista.js): el
+//   backend responde 403 a cualquier otro participante.
+// - Si se acortan las fechas y hay actividades fuera del nuevo rango, el
+//   backend responde 400 y el mensaje se muestra sin perder lo capturado.
 document.addEventListener("DOMContentLoaded", () => {
     const formulario = document.getElementById("formNuevoViaje");
     const btnGuardar = document.getElementById("btnGuardarViaje");
+    const titulo = document.querySelector("h1.tarjeta__titulo");
 
     const inputDestino = document.getElementById("destino");
     const inputFechaInicio = document.getElementById("fechaInicio");
@@ -9,6 +23,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectMoneda = document.getElementById("monedaBase");
 
     const campos = ["destino", "fechaInicio", "fechaFin", "presupuestoTotal", "monedaBase"];
+
+    // Modo edición si la ruta es /viajes/{id}/editar; si no, es creación.
+    // La ruta se parte por "/" y queda ["", "viajes", "{id}", "editar"].
+    const partesRuta = window.location.pathname.split("/");
+    const esEdicion = partesRuta.length === 4 && partesRuta[1] === "viajes" && partesRuta[3] === "editar";
+    let viajeId = null;
+    if (esEdicion) {
+        viajeId = partesRuta[2];
+    }
+    const textoBoton = esEdicion ? "Guardar cambios" : "Crear viaje";
 
     function limpiarErrores() {
         campos.forEach((campo) => {
@@ -88,6 +112,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // En modo edición, precarga los datos del viaje. Si no se puede
+    // cargar (404 o 403), manejarErrorApi ya muestra el mensaje.
+    async function cargarViajeParaEditar() {
+        if (!esEdicion) return;
+        if (titulo) titulo.textContent = "Editar viaje";
+        btnGuardar.textContent = textoBoton;
+        try {
+            const respuesta = await fetch(`/api/viajes/${viajeId}`, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (!respuesta.ok) {
+                await manejarErrorApi(respuesta);
+                return;
+            }
+            const viaje = await respuesta.json();
+            inputDestino.value = viaje.destino || "";
+            inputFechaInicio.value = viaje.fechaInicio || "";
+            inputFechaFin.value = viaje.fechaFin || "";
+            if (viaje.presupuestoTotal === null || viaje.presupuestoTotal === undefined) {
+                inputPresupuesto.value = "";
+            } else {
+                inputPresupuesto.value = viaje.presupuestoTotal;
+            }
+            if (viaje.monedaBase) selectMoneda.value = viaje.monedaBase;
+        } catch (error) {
+            mostrarErrorRed();
+        }
+    }
+
     formulario.addEventListener("submit", async (evento) => {
         evento.preventDefault();
 
@@ -104,11 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         btnGuardar.disabled = true;
-        btnGuardar.textContent = "Creando viaje...";
+        btnGuardar.textContent = esEdicion ? "Guardando cambios..." : "Creando viaje...";
 
         try {
-            const respuesta = await fetch("/api/viajes", {
-                method: "POST",
+            const respuesta = await fetch(esEdicion ? `/api/viajes/${viajeId}` : "/api/viajes", {
+                method: esEdicion ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json"
@@ -116,11 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(payload)
             });
 
-            if (respuesta.status === 201) {
-                const viajeCreado = await respuesta.json();
-                mostrarMensaje("exito", "Viaje creado correctamente");
+            if (respuesta.ok) {
+                const viajeGuardado = await respuesta.json();
+                mostrarMensaje("exito", esEdicion ? "Viaje actualizado correctamente" : "Viaje creado correctamente");
                 setTimeout(() => {
-                    window.location.href = `/viajes/${viajeCreado.id}`;
+                    window.location.href = `/viajes/${viajeGuardado.id}`;
                 }, 700);
                 return;
             }
@@ -135,7 +189,9 @@ document.addEventListener("DOMContentLoaded", () => {
             mostrarErrorRed();
         } finally {
             btnGuardar.disabled = false;
-            btnGuardar.textContent = "Crear viaje";
+            btnGuardar.textContent = textoBoton;
         }
     });
+
+    cargarViajeParaEditar();
 });

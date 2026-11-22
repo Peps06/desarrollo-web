@@ -1,3 +1,14 @@
+// Lista de viajes: tarjetas con filtros y eliminación (HU-23, frontend).
+// Basado en frontend/js/viajes-lista.js del ZIP desarrollo-web_0_yj7j.zip
+// (cabeza 96f7c78, tag V4, 20 nov 2026). Cambios respecto a esa versión:
+// - La tarjeta ya no es solo un enlace: ahora es un <article> que contiene
+//   el enlace al detalle y, solo si eres la organizadora, un botón Eliminar.
+//   Un botón no puede vivir dentro de un <a>, por eso cambió la estructura.
+// - El botón Eliminar llama a DELETE /api/viajes/{id} (HU-23, backend ya
+//   hecho: cancela el viaje, estado CANCELADO, 204) y quita la tarjeta de
+//   la lista sin recargar. Si era el último viaje, aparece el estado vacío.
+// - Solo la organizadora ve el botón: el backend responde 403 a cualquier
+//   otro participante, así que no se muestra lo que no se puede usar.
 document.addEventListener("DOMContentLoaded", () => {
     const rejillaViajes = document.getElementById("rejillaViajes");
     const estadoVacio = document.getElementById("estadoVacio");
@@ -10,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectRol = document.getElementById("filtroRol");
 
     let temporizadorBusqueda = null;
+    let viajesActuales = [];
 
     function formatearFecha(isoFecha) {
         if (!isoFecha) return "";
@@ -31,10 +43,46 @@ document.addEventListener("DOMContentLoaded", () => {
         return `$${formateado} ${moneda || "MXN"}`;
     }
 
+    function hayFiltrosActivos() {
+        return Boolean(inputDestino.value.trim() || selectRol.value);
+    }
+
+    async function eliminarViaje(viaje, tarjeta, boton) {
+        if (!window.confirm(`¿Eliminar el viaje a ${viaje.destino}? Se cancelará y dejará de aparecer en la lista de todos los participantes.`)) {
+            return;
+        }
+
+        boton.disabled = true;
+        try {
+            const respuesta = await fetch(`/api/viajes/${viaje.id}`, {
+                method: "DELETE",
+                credentials: "same-origin"
+            });
+
+            if (!respuesta.ok) {
+                await manejarErrorApi(respuesta);
+                return;
+            }
+
+            // 204 sin cuerpo: el viaje ya está CANCELADO y el GET de la
+            // lista no lo devuelve, así que lo quitamos de la vista.
+            viajesActuales = viajesActuales.filter((v) => v.id !== viaje.id);
+            mostrarMensaje("exito", `Viaje a ${viaje.destino} eliminado.`);
+            renderizarViajes(viajesActuales, hayFiltrosActivos());
+        } catch (error) {
+            mostrarErrorRed();
+        } finally {
+            boton.disabled = false;
+        }
+    }
+
     function crearTarjetaViaje(viaje) {
+        const tarjeta = document.createElement("article");
+        tarjeta.className = "tarjeta pila";
+
         const enlace = document.createElement("a");
         enlace.href = `/viajes/${viaje.id}`;
-        enlace.className = "tarjeta tarjeta--enlace pila";
+        enlace.className = "tarjeta--enlace pila";
 
         const esOrganizador = String(viaje.rol).toUpperCase() === "ORGANIZADOR";
 
@@ -66,11 +114,37 @@ document.addEventListener("DOMContentLoaded", () => {
         enlace.appendChild(cabecera);
         enlace.appendChild(fechas);
         enlace.appendChild(presupuesto);
+        tarjeta.appendChild(enlace);
 
-        return enlace;
+        // Solo la organizadora puede editar o cancelar el viaje (el
+        // backend responde 403 a los demás), así que solo ella ve
+        // estos botones.
+        if (esOrganizador) {
+            const acciones = document.createElement("div");
+            acciones.className = "fila";
+
+            const enlaceEditar = document.createElement("a");
+            enlaceEditar.href = `/viajes/${viaje.id}/editar`;
+            enlaceEditar.className = "btn btn-texto btn-pequeno";
+            enlaceEditar.textContent = "Editar";
+            enlaceEditar.setAttribute("aria-label", `Editar viaje a ${viaje.destino}`);
+            acciones.appendChild(enlaceEditar);
+
+            const btnEliminar = document.createElement("button");
+            btnEliminar.type = "button";
+            btnEliminar.className = "btn btn-texto btn-pequeno";
+            btnEliminar.textContent = "Eliminar viaje";
+            btnEliminar.setAttribute("aria-label", `Eliminar viaje a ${viaje.destino}`);
+            btnEliminar.addEventListener("click", () => eliminarViaje(viaje, tarjeta, btnEliminar));
+
+            acciones.appendChild(btnEliminar);
+            tarjeta.appendChild(acciones);
+        }
+
+        return tarjeta;
     }
 
-    function renderizarViajes(viajes, hayFiltrosActivos) {
+    function renderizarViajes(viajes, filtrosActivos) {
         estadoCarga.classList.add("oculto");
         rejillaViajes.innerHTML = "";
 
@@ -78,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
             rejillaViajes.classList.add("oculto");
             estadoVacio.classList.remove("oculto");
 
-            if (hayFiltrosActivos) {
+            if (filtrosActivos) {
                 tituloEstadoVacio.textContent = "Sin coincidencias";
                 textoEstadoVacio.textContent = "No encontramos viajes con los filtros seleccionados.";
                 btnCrearVacio.classList.add("oculto");
@@ -101,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function cargarViajes() {
         const destino = inputDestino.value.trim();
         const rol = selectRol.value;
-        const hayFiltrosActivos = Boolean(destino || rol);
+        const filtrosActivos = Boolean(destino || rol);
 
         const params = new URLSearchParams();
         if (destino) params.set("destino", destino);
@@ -122,8 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const viajes = await respuesta.json();
-            renderizarViajes(viajes, hayFiltrosActivos);
+            viajesActuales = await respuesta.json();
+            renderizarViajes(viajesActuales, filtrosActivos);
         } catch (error) {
             estadoCarga.classList.add("oculto");
             mostrarErrorRed();
