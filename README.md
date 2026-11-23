@@ -89,7 +89,7 @@ EXIT;
 
 El nombre de la base debe ser `bitacora_viajes` para todo el equipo. El usuario y la clave son de cada integrante y deben coincidir con los datos de `application.properties`.
 
-Las tablas no se crean a mano: las genera la aplicación al arrancar, a partir de las entidades del proyecto. El archivo `database/esquema.sql` es la referencia del diseño y sirve para comparar.
+Las tablas se crean con el archivo `database/esquema.sql` antes del primer arranque (ver sección Ejecución). Hibernate no puede crear `actividad` ni `gasto` en MySQL 8 (`Invalid default value for 'fecha_creacion'`).
 
 El diseño completo está en `documentacion/diseño-base-datos.md` y el diagrama entidad-relación en `documentacion/evidencias/diagrama-er.png`:
 
@@ -106,6 +106,22 @@ Las 7 tablas del sistema:
 | `voto`               | Un voto por persona por actividad                                            |
 | `gasto`              | Concepto, categoría, monto en moneda original y tipo de cambio               |
 | `tarea`              | Checklist del viaje y si está completada                                     |
+
+## Clonar el repositorio
+
+Clona el repositorio dentro de WSL, no en `/mnt/c`:
+
+```bash
+cd ~
+git clone git@github.com:Peps06/desarrollo-web.git
+cd desarrollo-web/backend
+```
+
+Si no tienes una llave SSH configurada en GitHub, clona con HTTPS:
+
+```bash
+git clone https://github.com/Peps06/desarrollo-web.git
+```
 
 ## Configuración local
 
@@ -127,18 +143,10 @@ Las demás propiedades pueden quedar como están. El archivo `application.proper
 
 ## Ejecución
 
-Clona el repositorio dentro de WSL, no en `/mnt/c`:
+Antes del primer arranque, crea las tablas desde la carpeta `backend` (la base debe estar vacía):
 
 ```bash
-cd ~
-git clone git@github.com:Peps06/desarrollo-web.git
-cd desarrollo-web/backend
-```
-
-Si no tienes una llave SSH configurada en GitHub, clona con HTTPS:
-
-```bash
-git clone https://github.com/Peps06/desarrollo-web.git
+mysql -u TU_USUARIO -p < ../database/esquema.sql
 ```
 
 Ejecuta la aplicación desde la carpeta `backend`:
@@ -194,6 +202,7 @@ Para volver a cargar los datos desde cero, borra la base y créala de nuevo:
 
 ```bash
 sudo mysql -e "DROP DATABASE bitacora_viajes; CREATE DATABASE bitacora_viajes CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u TU_USUARIO -p < ../database/esquema.sql
 ```
 
 ## API REST
@@ -271,6 +280,7 @@ Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
 | `/bin/sh^M: bad interpreter`         | El archivo tiene saltos de línea de Windows. Ejecuta `sed -i 's/\r$//' mvnw`.    |
 | `release version 17 not supported`   | Instala JDK 17 con `sudo apt install openjdk-17-jdk`.                            |
 | `Port 8080 was already in use`       | Otra aplicación usa el puerto. Cambia `server.port` en `application.properties`. |
+| `Errors were encountered while processing: mysql-server-8.0` | Otra distribución de WSL tiene MySQL encendido en el puerto 3306 (todas comparten la red). Detenla desde PowerShell con `wsl --terminate NOMBRE_DISTRIBUCION` y repite el `sudo apt install`. |
 
 ## Seguridad
 
