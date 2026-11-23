@@ -1,7 +1,7 @@
 # Reporte de IA Desarrollo en el Proyecto
 
 **Fecha:** 13-11-2026
-**Número de reporte:** 02 (Alfonso Mendoza Vásquez - HU-16 Consultar presupuesto)
+**Número de reporte:** 02 (Alfonso Mendoza Vásquez - Consultar presupuesto)
 
 ---
 

@@ -1,7 +1,7 @@
 # Reporte de IA Desarrollo en el Proyecto
 
 **Fecha:** 16-11-2026
-**Número de reporte:** 03 (Alfonso Mendoza Vásquez - HU-21 Balance de deudas del grupo)
+**Número de reporte:** 03 (Alfonso Mendoza Vásquez - Balance de deudas del grupo)
 
 ---
 

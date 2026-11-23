@@ -1,7 +1,7 @@
 # Reporte de IA Desarrollo en el Proyecto
 
 **Fecha:** 20-11-2026
-**Número de reporte:** 05 (Alfonso Mendoza Vásquez - HU-30 Votación en vivo con Fetch)
+**Número de reporte:** 05 (Alfonso Mendoza Vásquez - Votación en vivo con Fetch)
 
 ---
 

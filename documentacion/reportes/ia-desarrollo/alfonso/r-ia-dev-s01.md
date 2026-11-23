@@ -1,7 +1,7 @@
 # Reporte de IA Desarrollo en el Proyecto
 
 **Fecha:** 13-11-2026
-**Número de reporte:** 01 (Alfonso Mendoza Vásquez - HU-14 Votar actividad y quitar voto)
+**Número de reporte:** 01 (Alfonso Mendoza Vásquez - Votar actividad y quitar voto)
 
 ---
 
@@ -16,7 +16,7 @@ Implementación del servicio y los endpoints de votos: `POST` y `DELETE /api/act
 | Evidencia | Formato |
 | :--- | :--- |
 | **Herramienta** | Claude (Anthropic) |
-| **Modelo/temperatura** | Claude Sonnet 5.5(Anthropic), chat web |
+| **Modelo/temperatura** | Claude Sonnet 5.5 (Anthropic), chat web |
 | **Prompt original** | [Ver prompt original](#prompt-original) |
 | **Respuesta de IA** | [Ver resumen de respuesta](#respuesta-de-ia) |
 | **Código anterior** | Commit `9ae41c2dea4170a517172da76949c8db4d5caeb3` (Reporte act) |

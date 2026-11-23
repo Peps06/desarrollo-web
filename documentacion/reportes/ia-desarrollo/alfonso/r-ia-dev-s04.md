@@ -1,7 +1,7 @@
 # Reporte de IA Desarrollo en el Proyecto
 
 **Fecha:** 16-11-2026
-**Número de reporte:** 04 (Alfonso Mendoza Vásquez - HU-22 Actividad más votada por día)
+**Número de reporte:** 04 (Alfonso Mendoza Vásquez - Actividad más votada por día)
 
 ---
 
