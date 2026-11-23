@@ -163,8 +163,6 @@
 - **Citlaly Morales Viveros:** Implementó el listado de gastos por viaje en el backend y la respuesta ampliada de gastos. Desarrolló la interfaz de gastos (formulario, lista, edición y eliminación), la barra de presupuesto con actualización al cambiar gastos, y la vista previa y ventana modal de comprobantes. Resolvió el error de ejecución de `mvnw` en WSL, investigó el error de conexión a MySQL y documentó el uso de IA en sus reportes.
 - **Diego Rafael Jiménez Trujano:** Desarrolló la página de detalle del viaje con la línea de tiempo por días y la gestión de actividades sin recargar, y la exportación del itinerario a PDF con OpenPDF. Corrigió el orden de errores para viajes cancelados y dejó los contenedores y el evento que usan los demás módulos del detalle.
 
-_(Pendiente: participación de Diego.)_
-
 ---
 
 # 7. Próximas actividades
