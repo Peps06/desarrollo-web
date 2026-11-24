@@ -169,6 +169,11 @@ img {
     border-bottom-color: var(--verde-glaciar);
 }
 
+.barra-nav__enlaces .btn-secundario {
+    background-color: var(--superficie);
+}
+
+
 .barra-nav :focus-visible {
     outline-color: var(--verde-glaciar);
 }

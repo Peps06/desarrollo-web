@@ -1,7 +1,7 @@
 # Reporte de IA Desarrollo en el Proyecto
 
 **Fecha:** 19-11-2026
-**Número de reporte:** 07 (Dana Carmona Santamaría)
+**Número de reporte:** 07 (Dana Carmona Santamaria)
 
 ---
 > # Login y registro en el frontend
