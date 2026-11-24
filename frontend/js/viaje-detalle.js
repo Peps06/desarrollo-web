@@ -52,6 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let diaFiltrado = "";             // Día usado en el último filtro aplicado
     let numeroPeticionFiltro = 0;     // Descarta respuestas de filtros que ya no son las más recientes
     let temporizadorFiltro = null;
+    let numeroPeticionDetalle = 0;    // Descarta respuestas del detalle que llegan tarde (más viejas)
+    const SEGUNDOS_ACTUALIZAR = 5;    // Cada cuánto se piden los votos de los demás participantes
 
     /* ---------- Mensajes ---------- */
 
@@ -865,15 +867,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Vuelve a pedir el detalle (para refrescar la más votada y los totales) y reaplica los filtros.
     async function recargarDetalle() {
+        numeroPeticionDetalle++;
+        const miPeticion = numeroPeticionDetalle;
         try {
             const respuesta = await pedir(`/api/viajes/${viajeId}`);
             if (!respuesta) return;
+            // Si mientras tanto salió otra petición, esta ya es vieja y se ignora.
+            if (miPeticion !== numeroPeticionDetalle) return;
             if (!respuesta.ok) {
                 const errorData = await leerError(respuesta);
                 mostrarEstadoError(respuesta.status, errorData?.mensaje);
                 return;
             }
-            viaje = await respuesta.json();
+            const datos = await respuesta.json();
+            if (miPeticion !== numeroPeticionDetalle) return;
+            viaje = datos;
             renderizarEncabezado();
             renderizarDias();
             if (actividadesFiltradas !== null) {
@@ -949,6 +957,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // votos.js avisa cuando cambia un voto: se recarga el detalle para refrescar "Más votada".
     document.addEventListener("viaje:recargar", () => {
         recargarDetalle();
+    });
+
+    // Actualiza el detalle cada pocos segundos para ver los votos de los otros participantes
+    // y la "Más votada" correcta sin recargar. No lo hace si la pestaña no se ve o si el
+    // usuario tiene un formulario abierto (para no borrarle lo que está escribiendo).
+    setInterval(() => {
+        if (document.hidden || viaje === null) return;
+        if (listaDias.querySelector("form:not(.oculto)")) return;
+        recargarDetalle();
+    }, SEGUNDOS_ACTUALIZAR * 1000);
+
+    // Al regresar a la pestaña se actualiza de inmediato.
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && viaje !== null) {
+            recargarDetalle();
+        }
     });
 
     cargarPagina();
